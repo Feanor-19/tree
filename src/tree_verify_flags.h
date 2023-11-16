@@ -1,0 +1,14 @@
+//DSL
+#define _TREE_PTR (tree_ptr)
+
+
+// VERIFY FLAGS
+DEF_TREE_VERIFY_FLAG
+(
+    NULL_TREE_PNT,
+    "NULL_TREE_PNT",
+    (!_TREE_PTR)
+)
+
+
+//UNDEF DSL
