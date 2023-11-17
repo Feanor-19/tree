@@ -29,9 +29,15 @@ int main()
 
     tree_insert_data_as_right_child(&tree, node2, &arr[5]);
 
-    node2 = tree_get_right_child(node2);
+    TreeNode *node5 = tree_get_right_child(node2);
 
-    tree_insert_data_as_left_child(&tree, node2, &arr[6]);
+    tree_insert_data_as_left_child(&tree, node5, &arr[6]);
+
+    TREE_DUMP(&tree, 0);
+
+    tree_delete_left_child(&tree, node1);
+
+    tree_delete_left_child(&tree, tree_get_right_child(node2));
 
     TREE_DUMP(&tree, 0);
 

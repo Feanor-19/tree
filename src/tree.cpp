@@ -493,9 +493,12 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
                             curr_node);
         tree_ptr->print_data_func_ptr(dot_file, curr_node->data_ptr);
         fprintf(dot_file,   "</td></tr>\n"
-                            "<tr><td>left: [%p]</td><td>right: [%p]</td></tr></table>>];\n\n",
+                            "<tr><td>left: [%p]</td><td>right: [%p]</td></tr>\n"
+                            "<tr><td>prev: [%p]</td><td>next: [%p]</td></tr></table>>];\n\n",
                             curr_node->left,
-                            curr_node->right);
+                            curr_node->right,
+                            curr_node->prev,
+                            curr_node->next);
 
         nodes_arr[ind] = curr_node;
         curr_node = curr_node->next;
