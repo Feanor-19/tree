@@ -28,5 +28,6 @@ $(OBJ)/%.o : $(SRC)/%.cpp
 clean:
 	rm -f $(OBJFILES) $(OUT)
 
+.PHONY: clean_dumps
 clean_dumps:
 	rm -r -f $(DUMP_FOLDER)
