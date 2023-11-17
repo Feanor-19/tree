@@ -49,10 +49,8 @@ struct TreeNode
     TreeNode *left = NULL;
     TreeNode *right = NULL;
 
-#ifdef TREE_DO_DUMP
-    // TreeNode *prev = NULL;
-    // TreeNode *next = NULL;
-#endif /* TREE_DO_DUMP */
+    TreeNode *prev = NULL;  //< Is used in tree_dtor()
+    TreeNode *next = NULL;  //< Is used in tree_dtor()
 };
 
 #ifdef TREE_DO_DUMP
@@ -72,14 +70,12 @@ struct Tree
     size_t data_size = 0;
     size_t nodes_count = 0;
 
-    int (*print_data_func_ptr)(FILE* stream, void *data_ptr)    = NULL;
-    // void * (*scan_data_func_ptr)(FILE* stream)                     = NULL;
-    int (*data_dtor_func_ptr)(void *data_ptr)                   = NULL;
+    int (*data_dtor_func_ptr)(void *data_ptr) = NULL;
+
+    TreeNode *head_of_all_nodes = NULL; //< Is used in tree_dtor()
 
 #ifdef TREE_DO_DUMP
-    // TreeNode *head = NULL;
-    // TreeNode *tail = NULL;
-
+    int (*print_data_func_ptr)(FILE* stream, void *data_ptr) = NULL;
     TreeOrigInfo orig_info = {};
 #endif /* TREE_DO_DUMP */
 };
@@ -111,30 +107,35 @@ const size_t DEDLIST_MAX_CMD_GEN_DUMP_IMG_LENGHT = 1024;
 // TODO - сделать ли typedef для print_data_func_ptr?
 TreeStatus tree_ctor_( Tree *tree_ptr,
                        size_t data_size_in_bytes,
-                       int (*print_data_func_ptr)(FILE* stream, void *data_ptr),
                        int (*data_dtor_func_ptr)(void *data_ptr)
 #ifdef TREE_DO_DUMP
-                       , TreeOrigInfo orig_info
+                       , int (*print_data_func_ptr)(FILE* stream, void *data_ptr),
+                       TreeOrigInfo orig_info
 #endif
                     );
 
 #ifdef TREE_DO_DUMP
-#define tree_ctor( tree_ptr, data_size_in_bytes ) tree_ctor_(   tree_ptr,               \
-                                                                data_size_in_bytes,     \
-                                                                {                       \
-                                                                    #tree_ptr,          \
-                                                                    __FILE__,           \
-                                                                    __LINE__,           \
-                                                                    __func__            \
-                                                                }                       \
-                                                            )
+// TODO - написать пояснение
+#define tree_ctor( tree_ptr, data_size_in_bytes, data_dtor_func_ptr, print_data_func_ptr ) \
+    tree_ctor_  (   tree_ptr,               \
+                    data_size_in_bytes,     \
+                    data_dtor_func_ptr,     \
+                    print_data_func_ptr,    \
+                    {                       \
+                        #tree_ptr,          \
+                        __FILE__,           \
+                        __LINE__,           \
+                        __func__            \
+                    }                       \
+                )
 #else /* NOT TREE_DO_DUMP */
-#define tree_ctor( tree_ptr, data_size_in_bytes ) tree_ctor_(tree_ptr, data_size_in_bytes)
+#define tree_ctor( tree_ptr, data_size_in_bytes, data_dtor_func_ptr ) tree_ctor_(tree_ptr, data_size_in_bytes, data_dtor_func_ptr)
 #endif /* TREE_DO_DUMP */
 
 TreeStatus tree_dtor( Tree *tree_ptr );
 
 #ifdef TREE_DO_DUMP
+// TODO - добавить в верификатор проверку на то, что все узлы имеют данные
 static tree_verify_t tree_verify( Tree *tree_ptr );
 
 void tree_dump_( Tree *tree_ptr,
@@ -189,14 +190,22 @@ TreeStatus tree_get_data( Tree *tree_ptr, TreeNode *node_ptr, void *ret );
 
 // TODO - где не надо удалить из аргументов tree_ptr
 //! @brief Returns pointer to the left child of the node.
-TreeNode* tree_get_left_child( Tree *tree_ptr, TreeNode *node_ptr );
+TreeNode* tree_get_left_child( TreeNode *node_ptr );
 
 //! @brief Returns pointer to the right child of the node.
-TreeNode* tree_get_right_child( Tree *tree_ptr, TreeNode *node_ptr );
+TreeNode* tree_get_right_child( TreeNode *node_ptr );
 
-//! @brief Deletes specified node if it is a leaf, returns errors and does nothing otherwise.
-TreeStatus tree_delete_node( Tree *tree_ptr, TreeNode *node_ptr );
+//! @brief Deletes specified child of the node if it is a leaf, returns errors and does nothing otherwise.
+TreeStatus tree_delete_left_child( Tree *tree_ptr, TreeNode *node_ptr );
 
-int is_
+//! @brief Deletes specified child of the node if it is a leaf, returns errors and does nothing otherwise.
+TreeStatus tree_delete_right_child( Tree *tree_ptr, TreeNode *node_ptr );
+
+//! @brief Returns 1 if node has no children, 0 otherwise.
+int is_node_leaf( TreeNode* node_ptr);
+
+static TreeNode *op_new_TreeNode( void *data, size_t data_size );
+
+static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr );
 
 #endif /* TREE_H */
