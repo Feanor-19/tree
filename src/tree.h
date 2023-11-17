@@ -108,8 +108,11 @@ const size_t DEDLIST_MAX_CMD_GEN_DUMP_IMG_LENGHT = 1024;
 
 //------------------------------------------------------------------------------------------
 
+// TODO - сделать ли typedef для print_data_func_ptr?
 TreeStatus tree_ctor_( Tree *tree_ptr,
-                       size_t data_size_in_bytes
+                       size_t data_size_in_bytes,
+                       int (*print_data_func_ptr)(FILE* stream, void *data_ptr),
+                       int (*data_dtor_func_ptr)(void *data_ptr)
 #ifdef TREE_DO_DUMP
                        , TreeOrigInfo orig_info
 #endif
@@ -143,8 +146,9 @@ void tree_dump_( Tree *tree_ptr,
 #define TREE_DUMP( tree_ptr, verify_res ) tree_dump_( tree_ptr,     \
                                                       verify_res,   \
                                                       __FILE__,     \
-                                                      __LINE__      \
+                                                      __LINE__,     \
                                                       __func__ )
+
 
 #define TREE_SELFCHECK( tree_ptr ) {                        \
     tree_verify_t verify_res = tree_verify( tree_ptr );     \
@@ -155,41 +159,44 @@ void tree_dump_( Tree *tree_ptr,
     }                                                       \
 }
 
-static int tree_verify_check_nodes_count( Tree *tree_ptr )
-{
-    // TODO
-    return 0;
-}
+
+// static int tree_verify_check_nodes_count( Tree *tree_ptr );
+
 #else /* NOT TREE_DO_DUMP */
 #define TREE_DUMP( tree_ptr, verify_res ) ((void) 0)
 #define TREE_SELFCHECK( tree_ptr ) ((void) 0)
 #endif /* TREE_DO_DUMP */
 
-//! @brief Inserts data into the tree as a new node at the specified place.
+//! @brief Inserts data into the tree as a new node, connected to the specified node as its left child.
 //! @param [in] tree_ptr Tree pointer.
-//! @param [in] place Pointer to the field "left" or "right" of the corresponding TreeNode (see note).
+//! @param [in] node Node, which will have the newly-created node as its left child.
 //! @param [in] data Data will be copied from the place, specified by this pointer.
-//! @note `place` must be pointer, returned by tree_get_left_child_as_place_to_insert()/tree_get_right_child_as_place_to_insert(),
-//! or pointer to the field "root" in the struct Tree, if no nodes in the tree are present at the moment.
-TreeStatus tree_insert_data( Tree *tree_ptr, TreeNode **place, void *data );
+//! @note If left child of the specified node is occupied, error is returned and nothing is changed.
+TreeStatus tree_insert_data_as_left_child( Tree *tree_ptr, TreeNode *node_ptr, void *data );
+
+//! @brief Inserts data into the tree as a new node, connected to the specified node as its right child.
+//! @param [in] tree_ptr Tree pointer.
+//! @param [in] node Node, which will have the newly-created node as its right child.
+//! @param [in] data Data will be copied from the place, specified by this pointer.
+//! @note If right child of the specified node is occupied, error is returned and nothing is changed.
+TreeStatus tree_insert_data_as_right_child( Tree *tree_ptr, TreeNode *node_ptr, void *data );
 
 //! @brief Writes data from the specified node by pointer ret.
 //! @param [in] tree_ptr Tree pointer.
-//! @param [in] node Node which data must be recieved.
+//! @param [in] node_ptr Node which data must be recieved.
 //! @param [out] ret Pointer by which data must be written.
-TreeStatus tree_get_data( Tree *tree_ptr, TreeNode *node, void *ret );
+TreeStatus tree_get_data( Tree *tree_ptr, TreeNode *node_ptr, void *ret );
 
+// TODO - где не надо удалить из аргументов tree_ptr
 //! @brief Returns pointer to the left child of the node.
-TreeNode* tree_get_left_child_as_node( Tree *tree_ptr, TreeNode *node );
+TreeNode* tree_get_left_child( Tree *tree_ptr, TreeNode *node_ptr );
 
 //! @brief Returns pointer to the right child of the node.
-TreeNode* tree_get_right_child_as_node( Tree *tree_ptr, TreeNode *node );
+TreeNode* tree_get_right_child( Tree *tree_ptr, TreeNode *node_ptr );
 
-//! @brief Returns pointer to the field "left" of the specified node; is used in
-TreeNode** tree_get_left_child_as_place_to_insert( Tree *tree_ptr, TreeNode *node );
+//! @brief Deletes specified node if it is a leaf, returns errors and does nothing otherwise.
+TreeStatus tree_delete_node( Tree *tree_ptr, TreeNode *node_ptr );
 
-//! @brief Returns pointer to the left child of the node.
-TreeNode** tree_get_right_child_as_place_to_insert( Tree *tree_ptr, TreeNode *node );
-
+int is_
 
 #endif /* TREE_H */
