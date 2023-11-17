@@ -97,9 +97,9 @@ const char * const tree_verification_messages[] =
 #undef DEF_TREE_VERIFY_FLAG
 
 //! @brief Dump files will be stored in folder, specified by this path.
-const char* const DEDLIST_DUMP_PATH = ".\\dumps\\";
-const size_t DEDLIST_MAX_DUMP_PATH_LENGHT = 1024;
-const size_t DEDLIST_MAX_CMD_GEN_DUMP_IMG_LENGHT = 1024;
+const char* const TREE_DUMP_PATH = ".\\dumps\\";
+const size_t TREE_MAX_DUMP_PATH_LENGHT = 1024;
+const size_t TREE_MAX_CMD_GEN_DUMP_IMG_LENGHT = 1024;
 #endif /* TREE_DO_DUMP */
 
 //------------------------------------------------------------------------------------------
@@ -160,6 +160,9 @@ void tree_dump_( Tree *tree_ptr,
     }                                                       \
 }
 
+static void tree_print_verify_res(FILE *stream, int verify_res);
+
+void tree_print_status_message( FILE *stream, TreeStatus status );
 
 // static int tree_verify_check_nodes_count( Tree *tree_ptr );
 
@@ -216,5 +219,24 @@ int is_node_leaf( Tree *tree_ptr, TreeNode* node_ptr);
 static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data);
 
 static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr );
+
+//! @brief call tree_func, returning TreeStatus, and if
+// returned code isn't OK, immediately returns it.
+#define WRP_RET(tree_func) {     \
+    TreeStatus code = tree_func;    \
+    if (code != TREE_STATUS_OK)     \
+        return code;                \
+}
+
+//! @brief call tree_func, returning TreeStatus, and if
+// returned code isn't OK, prints status code and returns void.
+#define WRP_PRINT(tree_func) {                       \
+    TreeStatus code = tree_func;                        \
+    if (code != TREE_STATUS_OK)                         \
+    {                                                   \
+        tree_print_status_message(stderr, code);   \
+        return;                                         \
+    }                                                   \
+}
 
 #endif /* TREE_H */
