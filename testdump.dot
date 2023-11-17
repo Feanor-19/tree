@@ -1,0 +1,42 @@
+digraph{
+splines=ortho;
+bgcolor="#2D4059";
+
+
+NODE_TEXT[shape=note, fontname="verdana",
+style=bold, style=filled,
+color="#EA5455", fillcolor="#ECC237",
+label = "Tree[000000bb18bff840] (&tree) declared in src/main.cpp(12), in function main.\nTREE_DUMP() called from src/main.cpp(28), from function main.\ndata_size: 4; nodes_count: 3;\nroot: [0000029c568f4ea0];head_of_all_nodes: [0000029c568f1c40].\nTree verification result: <0>
+"]
+
+
+NODE_0[shape="record", fontname="verdana",
+style=bold, style=filled,
+color="#ECC237", fillcolor="#EA5455",
+label = <<table cellspacing="0">
+<tr><td colspan="2">address: [000000bb18bfeee8]</td></tr>
+<tr><td colspan="2">data: 2</td></tr>
+<tr><td>left: [0000000000000000]</td><td>right: [0000000000000000]</td></tr></table>>];
+
+NODE_1[shape="record", fontname="verdana",
+style=bold, style=filled,
+color="#ECC237", fillcolor="#EA5455",
+label = <<table cellspacing="0">
+<tr><td colspan="2">address: [000000bb18bfeee8]</td></tr>
+<tr><td colspan="2">data: 1</td></tr>
+<tr><td>left: [0000000000000000]</td><td>right: [0000000000000000]</td></tr></table>>];
+
+NODE_2[shape="record", fontname="verdana",
+style=bold, style=filled,
+color="#ECC237", fillcolor="#EA5455",
+label = <<table cellspacing="0">
+<tr><td colspan="2">address: [000000bb18bfeee8]</td></tr>
+<tr><td colspan="2">data: 0</td></tr>
+<tr><td>left: [0000029c568f1b60]</td><td>right: [0000029c568f1c40]</td></tr></table>>];
+
+NODE_2->NODE_1[color="#F07B3F", penwidth=2];
+NODE_2->NODE_0[color="#FFD460", penwidth=2];
+NODE_1->NODE_0[style=invis];
+{rank=same NODE_1 NODE_0}
+
+}

@@ -8,13 +8,23 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+
+static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data);
+
+static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr );
+
+static void tree_print_verify_res(FILE *stream, tree_verify_t verify_res);
+
+static tree_verify_t tree_verify( Tree *tree_ptr );
+
+
 TreeStatus tree_ctor_( Tree *tree_ptr,
                        size_t data_size_in_bytes,
-                       int (*data_dtor_func_ptr)(void *data_ptr)
 #ifdef TREE_DO_DUMP
-                       , int (*print_data_func_ptr)(FILE* stream, void *data_ptr),
-                       TreeOrigInfo orig_info
+                       void (*print_data_func_ptr)(FILE* stream, void *data_ptr),
+                       TreeOrigInfo orig_info,
 #endif
+                       void (*data_dtor_func_ptr)(void *data_ptr)
                     )
 {
     assert(tree_ptr);
@@ -22,6 +32,8 @@ TreeStatus tree_ctor_( Tree *tree_ptr,
 
     tree_ptr->data_size             = data_size_in_bytes;
     tree_ptr->data_dtor_func_ptr    = data_dtor_func_ptr;
+    tree_ptr->nodes_count = 0;
+    tree_ptr->root = NULL;
 
 #ifdef TREE_DO_DUMP
     tree_ptr->print_data_func_ptr   = print_data_func_ptr;
@@ -38,10 +50,20 @@ TreeStatus tree_dtor( Tree *tree_ptr )
     TreeNode *curr_node_ptr = tree_ptr->head_of_all_nodes;
     while ( curr_node_ptr != NULL )
     {
-        TreeNode *tmp = curr_node_ptr->prev;
+        TreeNode *tmp = curr_node_ptr->next;
         op_del_TreeNode(tree_ptr, curr_node_ptr);
         curr_node_ptr = tmp;
     }
+
+    tree_ptr->root                  = NULL;
+    tree_ptr->nodes_count           = 0;
+    tree_ptr->data_size             = 0;
+    tree_ptr->data_dtor_func_ptr    = NULL;
+
+#ifdef TREE_DO_DUMP
+    tree_ptr->print_data_func_ptr   = NULL;
+    tree_ptr->orig_info             = {};
+#endif
 
     return TREE_STATUS_OK;
 }
@@ -117,14 +139,14 @@ TreeNode *tree_get_root( Tree *tree_ptr )
     return tree_ptr->root;
 }
 
-TreeNode* tree_get_left_child( Tree *tree_ptr, TreeNode *node_ptr )
+TreeNode* tree_get_left_child( TreeNode *node_ptr )
 {
     assert(node_ptr);
 
     return node_ptr->left;
 }
 
-TreeNode* tree_get_right_child( Tree *tree_ptr, TreeNode *node_ptr )
+TreeNode* tree_get_right_child( TreeNode *node_ptr )
 {
     assert(node_ptr);
 
@@ -153,7 +175,7 @@ TreeStatus tree_delete_left_child( Tree *tree_ptr, TreeNode *node_ptr )
     if ( !node_ptr->left )
         return TREE_STATUS_WARNING_REQUEST_TO_DEL_NULL_NODE;
 
-    if ( !is_node_leaf(tree_ptr, node_ptr->left) )
+    if ( !is_node_leaf(node_ptr->left) )
         return TREE_STATUS_WARNING_REQUEST_TO_DEL_NOT_A_LEAF;
 
     op_del_TreeNode(tree_ptr, node_ptr->left);
@@ -171,7 +193,7 @@ TreeStatus tree_delete_right_child( Tree *tree_ptr, TreeNode *node_ptr )
     if ( !node_ptr->right )
         return TREE_STATUS_WARNING_REQUEST_TO_DEL_NULL_NODE;
 
-    if ( !is_node_leaf(tree_ptr, node_ptr->right) )
+    if ( !is_node_leaf(node_ptr->right) )
         return TREE_STATUS_WARNING_REQUEST_TO_DEL_NOT_A_LEAF;
 
     op_del_TreeNode(tree_ptr, node_ptr->right);
@@ -181,7 +203,7 @@ TreeStatus tree_delete_right_child( Tree *tree_ptr, TreeNode *node_ptr )
     return TREE_STATUS_OK;
 }
 
-int is_node_leaf( Tree *tree_ptr, TreeNode* node_ptr)
+int is_node_leaf( TreeNode* node_ptr)
 {
     assert(node_ptr);
 
@@ -203,11 +225,13 @@ static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data )
 
     TreeNode *tmp = tree_ptr->head_of_all_nodes;
     tree_ptr->head_of_all_nodes = new_node;
-    new_node->prev = tmp;
+    new_node->next = tmp;
     if (tmp)
     {
-        tmp->next = new_node;
+        tmp->prev = new_node;
     }
+
+    tree_ptr->nodes_count++;
 
     return new_node;
 }
@@ -217,7 +241,7 @@ static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
     assert(tree_ptr);
     assert(node_ptr);
 
-    tree_ptr->data_dtor_func_ptr( node_ptr->data_ptr );
+    if ( tree_ptr->data_dtor_func_ptr ) tree_ptr->data_dtor_func_ptr( node_ptr->data_ptr );
 
     node_ptr->left = NULL;
     node_ptr->right = NULL;
@@ -230,15 +254,17 @@ static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
     if (prev)
         prev->next = next;
 
-    if (!next)
+    if (!prev)
     {
-       tree_ptr->head_of_all_nodes = prev;
+       tree_ptr->head_of_all_nodes = next;
     }
 
     node_ptr->next = NULL;
     node_ptr->prev = NULL;
 
     free(node_ptr);
+
+    tree_ptr->nodes_count--;
 }
 
 #ifdef TREE_DO_DUMP
@@ -250,9 +276,9 @@ static tree_verify_t tree_verify( Tree *tree_ptr )
     return 0;
 }
 
-static void tree_print_verify_res(FILE *stream, int verify_res)
+static void tree_print_verify_res(FILE *stream, tree_verify_t verify_res)
 {
-    fprintf(stream, "Tree verification result: <%d>\n", verify_res);
+    fprintf(stream, "Tree verification result: <%llu>\n", verify_res);
     for (size_t ind = 0; ind < sizeof(tree_verification_messages)/sizeof(tree_verification_messages[0]); ind++)
     {
         if (verify_res & ( 1 << ind ))
@@ -401,29 +427,27 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
                                             tree_verify_t verify_res,
                                             const char *called_from_file,
                                             const int called_from_line,
-                                            const char *called_from_func  )
+                                            const char *called_from_func )
 {
     // писать сразу в файл медленно, но когда генерится дамп, эта скорость не важна
 
-#define COLOR_BG "#2D4059"
-#define COLOR_OCCUP_NODE_COLOR "#ECC237"
-#define COLOR_OCCUP_NODE_FILL "#EA5455"
-#define COLOR_FREE_NODE_COLOR "#ECC237"
-#define COLOR_FREE_NODE_FILL "#8ccb5e"
-#define COLOR_LABEL_COLOR "#EA5455"
-#define COLOR_LABEL_FILL "#ECC237"
-#define COLOR_EDGE_PREV "#F07B3F"
-#define COLOR_EDGE_NEXT "#FFD460"
-#define COLOR_EDGE_FREE "#8ccb5e"
+#define COLOR_BG            "#2D4059"
+#define COLOR_NODE_COLOR    "#ECC237"
+#define COLOR_NODE_FILL     "#EA5455"
+#define COLOR_LABEL_COLOR   "#EA5455"
+#define COLOR_LABEL_FILL    "#ECC237"
+#define COLOR_EDGE_LEFT     "#F07B3F"
+#define COLOR_EDGE_RIGHT    "#FFD460"
+#define COLOR_EDGE          "#8ccb5e"
 
-    //---------------------------------------------------------------------
+
+    // Dot header
     fprintf(dot_file,   "digraph{\n"
                         "splines=ortho;\n"
                         "bgcolor=\"" COLOR_BG "\";"
                         "\n\n\n");
-    //---------------------------------------------------------------------
 
-    //---------------------------------NODE_TEXT--------------------------
+
     // Node text
     fprintf(dot_file,   "NODE_TEXT[shape=note, fontname=\"verdana\",\n"
                         "style=bold, style=filled,\n"
@@ -431,7 +455,7 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
                         "label = \"");
     fprintf(dot_file,   "Tree[%p] (%s) declared in %s(%d), in function %s.\\n"
                         "TREE_DUMP() called from %s(%d), from function %s.\\n"
-                        "capacity: %lld; free: %lld; nodes: [%p].",
+                        "data_size: %llu; nodes_count: %llu;\\nroot: [%p];head_of_all_nodes: [%p].\\n",
                         tree_ptr,
                         tree_ptr->orig_info.name,
                         tree_ptr->orig_info.orig_file_name,
@@ -440,128 +464,84 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
                         called_from_file,
                         called_from_line,
                         called_from_func,
-                        dedlist_ptr->capacity,
-                        dedlist_ptr->free,
-                        dedlist_ptr->nodes);
+                        tree_ptr->data_size,
+                        tree_ptr->nodes_count,
+                        tree_ptr->root,
+                        tree_ptr->head_of_all_nodes);
     tree_print_verify_res(dot_file, verify_res);
     fprintf(dot_file, "\"]\n\n\n");
 
-    // Node 0
-    fprintf(dot_file,   "NODE_0[shape=\"record\", fontname=\"verdana\",\n"
-                        "style=bold, style=filled,\n"
-                        "color=\"" COLOR_LABEL_COLOR "\", fillcolor=\"" COLOR_LABEL_FILL "\",\n"
-                        "label = <<table cellspacing=\"0\">\n"
-                        "<tr><td colspan=\"2\">ind: 0</td></tr>\n"
-                        "<tr><td colspan=\"2\">data: FICTIONAL</td></tr>\n"
-                        "<tr><td>prev: %td</td><td>next: %td</td></tr></table>>];\n\n\n",
-                        dedlist_ptr->nodes[0].prev,
-                        dedlist_ptr->nodes[0].next);
-    //---------------------------------------------------------------------
 
-
-    //---------------------------OTHER_NODES-------------------------------
-    for (size_t ind = 1; ind < dedlist_ptr->capacity; ind++)
+    // Nodes with data
+    TreeNode *curr_node = tree_ptr->head_of_all_nodes;
+    TreeNode **nodes_arr = (TreeNode**) calloc( tree_ptr->nodes_count, sizeof(TreeNode) );
+    for (size_t ind = 0; ind < tree_ptr->nodes_count; ind++)
     {
-        if ( !is_node_free_(dedlist_ptr, ind) )
+        if ( curr_node == NULL )
         {
-            // occupied node
-            fprintf(dot_file,   "NODE_%llu[shape=\"record\", fontname=\"verdana\",\n"
-                                "style=bold, style=filled,\n"
-                                "color=\"" COLOR_OCCUP_NODE_COLOR "\", fillcolor=\"" COLOR_OCCUP_NODE_FILL "\",\n"
-                                "label = <<table cellspacing=\"0\">\n"
-                                "<tr><td colspan=\"2\">ind: %llu</td></tr>\n"
-                                "<tr><td colspan=\"2\">data: ",
-                                ind,
-                                ind);
-            dedlist_print_elem_t(dot_file, dedlist_ptr->nodes[ind].data );
-            fprintf(dot_file,   "</td></tr>\n"
-                                "<tr><td>prev: %td</td><td>next: %td</td></tr></table>>];\n\n",
-                                dedlist_ptr->nodes[ind].prev,
-                                dedlist_ptr->nodes[ind].next);
+            fprintf(stderr, "ERROR: something wrong with listing of nodes!\n");
+            break;
         }
-        else
+
+        fprintf(dot_file,   "NODE_%llu[shape=\"record\", fontname=\"verdana\",\n"
+                            "style=bold, style=filled,\n"
+                            "color=\"" COLOR_NODE_COLOR "\", fillcolor=\"" COLOR_NODE_FILL "\",\n"
+                            "label = <<table cellspacing=\"0\">\n"
+                            "<tr><td colspan=\"2\">address: [%p]</td></tr>\n"
+                            "<tr><td colspan=\"2\">data: ",
+                            ind,
+                            &curr_node);
+        tree_ptr->print_data_func_ptr(dot_file, curr_node->data_ptr);
+        fprintf(dot_file,   "</td></tr>\n"
+                            "<tr><td>left: [%p]</td><td>right: [%p]</td></tr></table>>];\n\n",
+                            curr_node->left,
+                            curr_node->right);
+
+        nodes_arr[ind] = curr_node;
+        curr_node = curr_node->next;
+    }
+
+
+    // Edges
+    for (size_t ind = 0; ind < tree_ptr->nodes_count; ind++)
+    {
+        size_t left = 0;
+        size_t right = 0;
+        for (size_t i = 0; i < tree_ptr->nodes_count; i++)
         {
-            //free node
-            fprintf(dot_file,   "NODE_%llu[shape=\"record\", fontname=\"verdana\",\n"
-                                "style=bold, style=filled,\n"
-                                "color=\"" COLOR_FREE_NODE_COLOR "\", fillcolor=\"" COLOR_FREE_NODE_FILL "\",\n"
-                                "label = <<table cellspacing=\"0\">\n"
-                                "<tr><td colspan=\"2\">ind: %llu</td></tr>\n"
-                                "<tr><td colspan=\"2\">data: free</td></tr>\n"
-                                "<tr><td>prev: %td</td><td>next: %td</td></tr></table>>];\n\n",
-                                ind,
-                                ind,
-                                dedlist_ptr->nodes[ind].prev,
-                                dedlist_ptr->nodes[ind].next);
+            if ( nodes_arr[i] == nodes_arr[ind]->left )
+            {
+                left = i;
+            }
+            else if ( nodes_arr[i] == nodes_arr[ind]->right )
+            {
+                right = i;
+            }
         }
-    }
-    //---------------------------------------------------------------------
 
-
-    //-------------------------------SPECIAL_LABELS------------------------
-    fprintf(dot_file,   "HEAD[shape=tripleoctagon, style=filled,\n"
-                        "fontname=\"verdana\", color=\"" COLOR_LABEL_COLOR "\", fillcolor=\"" COLOR_LABEL_FILL "\"];\n\n"
-                        "TAIL[shape=tripleoctagon, style=filled,\n"
-                        "fontname=\"verdana\", color=\"" COLOR_LABEL_COLOR "\", fillcolor=\"" COLOR_LABEL_FILL "\"];\n\n"
-                        "FREE[shape=tripleoctagon, style=filled,\n"
-                        "fontname=\"verdana\", color=\"" COLOR_LABEL_COLOR "\", fillcolor=\"" COLOR_LABEL_FILL "\"];\n\n\n");
-    //---------------------------------------------------------------------
-
-
-    //-----------------------------------NODES_SEWING----------------------
-    fprintf(dot_file, "{rank=same; NODE_TEXT ");
-    for (size_t ind = 0; ind < dedlist_ptr->capacity; ind++)
-    {
-        fprintf(dot_file,   "NODE_%lld ", ind);
-    }
-    fprintf(dot_file,   "}\n");
-
-    fprintf(dot_file,   "NODE_TEXT->NODE_0[weight=10, style=invis];\n");
-    for (size_t ind = 0; ind < dedlist_ptr->capacity - 1; ind++)
-    {
-        fprintf(dot_file,   "NODE_%lld->NODE_%lld[weight=10, style=invis];\n",
-                            ind, ind+1);
-    }
-    //---------------------------------------------------------------------
-
-
-    //----------------------------SPECIAL_LABELS_EDGES---------------------
-    fprintf(dot_file,   "HEAD->NODE_%td[style=invis];\n"
-                        "TAIL->NODE_%td[style=invis];\n"
-                        "FREE->NODE_%td[style=invis];\n\n\n",
-                        dedlist_get_head_ind(dedlist_ptr),
-                        dedlist_get_tail_ind(dedlist_ptr),
-                        dedlist_ptr->free );
-    //---------------------------------------------------------------------
-
-
-    //--------------------------------------EDGES--------------------------
-    for (size_t ind = 0; ind < dedlist_ptr->capacity; ind++)
-    {
-        if ( !is_node_free_(dedlist_ptr, ind) )
+        if ( nodes_arr[ind]->left )
         {
-            // occupied node
-            fprintf(dot_file,   "NODE_%lld->NODE_%td[color=\"" COLOR_EDGE_PREV "\", penwidth=2];\n"
-                                "NODE_%lld->NODE_%td[color=\"" COLOR_EDGE_NEXT "\", penwidth=2];\n\n",
-                                ind,
-                                dedlist_ptr->nodes[ind].prev,
-                                ind,
-                                dedlist_ptr->nodes[ind].next);
+            fprintf(dot_file,   "NODE_%llu->NODE_%llu[color=\"" COLOR_EDGE_LEFT "\", penwidth=2];\n",
+                                ind, left);
         }
-        else
+
+        if ( nodes_arr[ind]->right )
         {
-            // free node
-            fprintf(dot_file,   "NODE_%lld->NODE_%lld[color=\"" COLOR_EDGE_FREE "\", penwidth=2];\n",
-                                ind,
-                                dedlist_ptr->nodes[ind].next);
+            fprintf(dot_file,   "NODE_%llu->NODE_%llu[color=\"" COLOR_EDGE_RIGHT "\", penwidth=2];\n",
+                                ind, right);
+        }
+
+        if ( nodes_arr[ind]->left && nodes_arr[ind]->right )
+        {
+            fprintf(dot_file,   "NODE_%llu->NODE_%llu[style=invis];\n"
+                                "{rank=same NODE_%llu NODE_%llu}",
+                                left, right, left, right);
         }
     }
-    //---------------------------------------------------------------------
 
 
-    //---------------------------------------------------------------------
     fprintf(dot_file, "\n}\n");
-    //---------------------------------------------------------------------
+
 
 #undef COLOR_BG
 #undef COLOR_OCCUP_NODE_COLOR
@@ -573,6 +553,7 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
 #undef COLOR_EDGE_PREV
 #undef COLOR_EDGE_NEXT
 #undef COLOR_EDGE_FREE
+
 
     return TREE_STATUS_OK;
 }
