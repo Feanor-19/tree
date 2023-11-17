@@ -80,6 +80,8 @@ TreeStatus tree_insert_root( Tree *tree_ptr, void *data )
     if (!new_node)
         return TREE_STATUS_ERROR_MEM_ALLOC;
 
+    new_node->level = 0;
+
     tree_ptr->root = new_node;
 
     return TREE_STATUS_OK;
@@ -98,6 +100,8 @@ TreeStatus tree_insert_data_as_left_child( Tree *tree_ptr, TreeNode *node_ptr, v
     if (!new_node)
         return TREE_STATUS_ERROR_MEM_ALLOC;
 
+    new_node->level = node_ptr->level + 1;
+
     node_ptr->left = new_node;
 
     return TREE_STATUS_OK;
@@ -115,6 +119,8 @@ TreeStatus tree_insert_data_as_right_child( Tree *tree_ptr, TreeNode *node_ptr, 
     TreeNode *new_node = op_new_TreeNode(tree_ptr, data);
     if (!new_node)
         return TREE_STATUS_ERROR_MEM_ALLOC;
+
+    new_node->level = node_ptr->level + 1;
 
     node_ptr->right = new_node;
 
@@ -268,13 +274,49 @@ static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
 }
 
 #ifdef TREE_DO_DUMP
+inline int verify_check_nodes_count( Tree *tree_ptr )
+{
+    assert(tree_ptr);
 
+    size_t nodes_count = 0;
+    TreeNode *curr_node = tree_ptr->head_of_all_nodes;
+
+    while (curr_node != NULL)
+    {
+        nodes_count++;
+        curr_node = curr_node->next;
+    }
+
+    return nodes_count == tree_ptr->nodes_count;
+}
+
+inline int verify_check_nodes_data_pointer( Tree *tree_ptr )
+{
+    assert(tree_ptr);
+
+    TreeNode *curr_node = tree_ptr->head_of_all_nodes;
+
+    while (curr_node != NULL)
+    {
+        if (!curr_node->data_ptr)
+            return 0;
+        curr_node = curr_node->next;
+    }
+    return 1;
+}
+
+#define DEF_TREE_VERIFY_FLAG(name, message, cond) {if ((cond)) {verify_res |= (1 << (bit));} bit++;}
 static tree_verify_t tree_verify( Tree *tree_ptr )
 {
-    // TODO -
+    tree_verify_t verify_res = 0;
 
-    return 0;
+    int bit = 0;
+
+    #include "tree_verify_flags.h"
+
+    return verify_res;
 }
+#undef DEF_TREE_VERIFY_FLAG
 
 static void tree_print_verify_res(FILE *stream, tree_verify_t verify_res)
 {
@@ -488,9 +530,11 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
                             "color=\"" COLOR_NODE_COLOR "\", fillcolor=\"" COLOR_NODE_FILL "\",\n"
                             "label = <<table cellspacing=\"0\">\n"
                             "<tr><td colspan=\"2\">address: [%p]</td></tr>\n"
+                            "<tr><td colspan=\"2\">level: %llu</td></tr>\n"
                             "<tr><td colspan=\"2\">data: ",
                             ind,
-                            curr_node);
+                            curr_node,
+                            curr_node->level);
         tree_ptr->print_data_func_ptr(dot_file, curr_node->data_ptr);
         fprintf(dot_file,   "</td></tr>\n"
                             "<tr><td>left: [%p]</td><td>right: [%p]</td></tr>\n"

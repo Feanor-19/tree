@@ -31,7 +31,7 @@ enum TreeStatus
     #include "tree_statuses.h"
 };
 #undef DEF_TREE_STATUS
-// TODO - дописать верификатор!!!
+
 #ifdef TREE_DO_DUMP
 #define DEF_TREE_VERIFY_FLAG(name, message, cond) TREE_VERIFY_##name,
 enum TreeVerifyFlag
@@ -46,10 +46,11 @@ enum TreeVerifyFlag
 //! is stored in the Tree struct.
 struct TreeNode
 {
-    // TODO - добавить ранг (расстояние от корня)
     void *data_ptr = NULL;
     TreeNode *left = NULL;
     TreeNode *right = NULL;
+
+    size_t level = 0;        //< Distance from the root node.
 
     TreeNode *prev = NULL;  //< Is used in tree_dtor() and tree_dump()
     TreeNode *next = NULL;  //< Is used in tree_dtor() and tree_dump()
@@ -117,7 +118,12 @@ TreeStatus tree_ctor_( Tree *tree_ptr,
                     );
 
 #ifdef TREE_DO_DUMP
-// TODO - написать пояснение
+//! @param [in] tree_ptr Tree pointer.
+//! @param [in] data_size_in_bytes Size in bytes of one element to be stored in the tree.
+//! @param [in] data_dtor_func_ptr Pointer to deconstructor of elememts to be stored in the tree.
+//! void data_dtor(void *data_ptr)
+//! @param [in] print_data_func_ptr Pointer to function, printing element.
+//! void data_print(FILE *stream, void *data_ptr).
 #define tree_ctor( tree_ptr, data_size_in_bytes, data_dtor_func_ptr, print_data_func_ptr ) \
     tree_ctor_  (   tree_ptr,               \
                     data_size_in_bytes,     \
@@ -131,13 +137,16 @@ TreeStatus tree_ctor_( Tree *tree_ptr,
                     data_dtor_func_ptr      \
                 )
 #else /* NOT TREE_DO_DUMP */
+//! @param [in] tree_ptr Tree pointer.
+//! @param [in] data_size_in_bytes Size in bytes of one element to be stored in the tree.
+//! @param [in] data_dtor_func_ptr Pointer to deconstructor of elememts to be stored in the tree.
+//! void data_dtor(void *data_ptr)
 #define tree_ctor( tree_ptr, data_size_in_bytes, data_dtor_func_ptr ) tree_ctor_(tree_ptr, data_size_in_bytes, data_dtor_func_ptr)
 #endif /* TREE_DO_DUMP */
 
 TreeStatus tree_dtor( Tree *tree_ptr );
 
 #ifdef TREE_DO_DUMP
-// TODO - добавить в верификатор проверку на то, что все узлы имеют данные
 
 void tree_dump_( Tree *tree_ptr,
                  tree_verify_t verify_res,
@@ -162,8 +171,6 @@ void tree_dump_( Tree *tree_ptr,
 }
 
 void tree_print_status_message( FILE *stream, TreeStatus status );
-
-// static int tree_verify_check_nodes_count( Tree *tree_ptr );
 
 #else /* NOT TREE_DO_DUMP */
 #define TREE_DUMP( tree_ptr, verify_res ) ((void) 0)
