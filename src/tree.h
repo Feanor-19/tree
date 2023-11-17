@@ -168,6 +168,12 @@ void tree_dump_( Tree *tree_ptr,
 #define TREE_SELFCHECK( tree_ptr ) ((void) 0)
 #endif /* TREE_DO_DUMP */
 
+//! @brief Inserts data into the empty tree as a new node. The new node becomes the root node.
+//! @param [in] tree_ptr Tree pointer.
+//! @param [in] data Data will be copied from the place, specified by this pointer.
+//! @note If the tree is not empty (root node already exists), error is returned.
+TreeStatus tree_insert_root( Tree *tree_ptr, void *data );
+
 //! @brief Inserts data into the tree as a new node, connected to the specified node as its left child.
 //! @param [in] tree_ptr Tree pointer.
 //! @param [in] node Node, which will have the newly-created node as its left child.
@@ -188,12 +194,15 @@ TreeStatus tree_insert_data_as_right_child( Tree *tree_ptr, TreeNode *node_ptr, 
 //! @param [out] ret Pointer by which data must be written.
 TreeStatus tree_get_data( Tree *tree_ptr, TreeNode *node_ptr, void *ret );
 
-// TODO - где не надо удалить из аргументов tree_ptr
+TreeNode *tree_get_root( Tree *tree_ptr );
+
 //! @brief Returns pointer to the left child of the node.
-TreeNode* tree_get_left_child( TreeNode *node_ptr );
+TreeNode* tree_get_left_child( Tree *tree_ptr, TreeNode *node_ptr );
 
 //! @brief Returns pointer to the right child of the node.
-TreeNode* tree_get_right_child( TreeNode *node_ptr );
+TreeNode* tree_get_right_child( Tree *tree_ptr, TreeNode *node_ptr );
+
+TreeStatus tree_delete_root( Tree *tree_ptr );
 
 //! @brief Deletes specified child of the node if it is a leaf, returns errors and does nothing otherwise.
 TreeStatus tree_delete_left_child( Tree *tree_ptr, TreeNode *node_ptr );
@@ -202,9 +211,9 @@ TreeStatus tree_delete_left_child( Tree *tree_ptr, TreeNode *node_ptr );
 TreeStatus tree_delete_right_child( Tree *tree_ptr, TreeNode *node_ptr );
 
 //! @brief Returns 1 if node has no children, 0 otherwise.
-int is_node_leaf( TreeNode* node_ptr);
+int is_node_leaf( Tree *tree_ptr, TreeNode* node_ptr);
 
-static TreeNode *op_new_TreeNode( void *data, size_t data_size );
+static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data);
 
 static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr );
 
