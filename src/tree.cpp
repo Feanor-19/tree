@@ -490,7 +490,7 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
                             "<tr><td colspan=\"2\">address: [%p]</td></tr>\n"
                             "<tr><td colspan=\"2\">data: ",
                             ind,
-                            &curr_node);
+                            curr_node);
         tree_ptr->print_data_func_ptr(dot_file, curr_node->data_ptr);
         fprintf(dot_file,   "</td></tr>\n"
                             "<tr><td>left: [%p]</td><td>right: [%p]</td></tr></table>>];\n\n",

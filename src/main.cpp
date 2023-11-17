@@ -19,13 +19,23 @@ int main()
 
     tree_insert_data_as_right_child(&tree, tree_get_root(&tree), &arr[2]);
 
-    TreeNode *node = tree_get_left_child( tree_get_root( &tree ) );
+    TreeNode *node1 = tree_get_left_child( tree_get_root( &tree ) );
 
-    tree_insert_data_as_left_child(&tree, node, &arr[3]);
+    tree_insert_data_as_left_child(&tree, node1, &arr[3]);
 
-    tree_insert_data_as_right_child(&tree, node, &arr[4]);
+    tree_insert_data_as_right_child(&tree, node1, &arr[4]);
+
+    TreeNode *node2 = tree_get_right_child( tree_get_root( &tree ) );
+
+    tree_insert_data_as_right_child(&tree, node2, &arr[5]);
+
+    node2 = tree_get_right_child(node2);
+
+    tree_insert_data_as_left_child(&tree, node2, &arr[6]);
 
     TREE_DUMP(&tree, 0);
+
+    tree_dtor(&tree);
 
     return 0;
 }
