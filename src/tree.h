@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+// https://stackoverflow.com/questions/5947067/how-to-create-a-static-library-with-g
+
 /*
     AVAILABLE DEFINES:
     - TREE_DO_DUMP
@@ -240,5 +242,14 @@ int is_node_leaf( TreeNode* node_ptr);
         return;                                         \
     }                                                   \
 }
+
+TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data);
+
+void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr );
+
+void tree_print_verify_res(FILE *stream, tree_verify_t verify_res);
+
+tree_verify_t tree_verify( Tree *tree_ptr );
+
 
 #endif /* TREE_H */
