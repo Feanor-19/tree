@@ -9,6 +9,13 @@
 #include <unistd.h>
 
 
+static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data);
+
+static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr );
+
+static void tree_print_verify_res(FILE *stream, tree_verify_t verify_res);
+
+static tree_verify_t tree_verify( Tree *tree_ptr );
 
 
 TreeStatus tree_ctor_( Tree *tree_ptr,
@@ -209,7 +216,7 @@ int is_node_leaf( TreeNode* node_ptr)
     return ( !node_ptr->left && !node_ptr->right );
 }
 
-TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data )
+static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data )
 {
     assert(data);
 
@@ -235,7 +242,7 @@ TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data )
     return new_node;
 }
 
-void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
+static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
 {
     assert(tree_ptr);
     assert(node_ptr);
@@ -299,7 +306,7 @@ inline int verify_check_nodes_data_pointer( Tree *tree_ptr )
 }
 
 #define DEF_TREE_VERIFY_FLAG(name, message, cond) {if ((cond)) {verify_res |= (1 << (bit));} bit++;}
-tree_verify_t tree_verify( Tree *tree_ptr )
+static tree_verify_t tree_verify( Tree *tree_ptr )
 {
     tree_verify_t verify_res = 0;
 
@@ -311,7 +318,7 @@ tree_verify_t tree_verify( Tree *tree_ptr )
 }
 #undef DEF_TREE_VERIFY_FLAG
 
-void tree_print_verify_res(FILE *stream, tree_verify_t verify_res)
+static void tree_print_verify_res(FILE *stream, tree_verify_t verify_res)
 {
     fprintf(stream, "Tree verification result: <%llu>\n", verify_res);
     for (size_t ind = 0; ind < sizeof(tree_verification_messages)/sizeof(tree_verification_messages[0]); ind++)
@@ -524,12 +531,12 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
                             "label = <<table cellspacing=\"0\">\n"
                             "<tr><td colspan=\"2\">address: [%p]</td></tr>\n"
                             "<tr><td colspan=\"2\">level: %llu</td></tr>\n"
-                            "<tr><td colspan=\"2\"><b>data: ",
+                            "<tr><td colspan=\"2\">data: ",
                             ind,
                             curr_node,
                             curr_node->level);
         tree_ptr->print_data_func_ptr(dot_file, curr_node->data_ptr);
-        fprintf(dot_file,   "</b></td></tr>\n"
+        fprintf(dot_file,   "</td></tr>\n"
                             "<tr><td>left: [%p]</td><td>right: [%p]</td></tr>\n"
                             "<tr><td>prev: [%p]</td><td>next: [%p]</td></tr></table>>];\n\n",
                             curr_node->left,
