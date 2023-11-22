@@ -138,6 +138,18 @@ TreeStatus tree_get_data( Tree *tree_ptr, TreeNode *node_ptr, void *ret )
     return TREE_STATUS_OK;
 }
 
+TreeStatus tree_change_data( Tree *tree_ptr, TreeNode *node_ptr, void *new_data )
+{
+    TREE_SELFCHECK(tree_ptr);
+    assert(node_ptr);
+    assert(new_data);
+
+    tree_ptr->data_dtor_func_ptr(node_ptr->data_ptr);
+    memcpy( node_ptr->data_ptr, new_data, tree_ptr->data_size );
+
+    return TREE_STATUS_OK;
+}
+
 TreeNode *tree_get_root( Tree *tree_ptr )
 {
     assert(tree_ptr);

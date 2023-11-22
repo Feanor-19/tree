@@ -203,6 +203,8 @@ TreeStatus tree_insert_data_as_right_child( Tree *tree_ptr, TreeNode *node_ptr, 
 //! @param [out] ret Pointer by which data must be written.
 TreeStatus tree_get_data( Tree *tree_ptr, TreeNode *node_ptr, void *ret );
 
+TreeStatus tree_change_data( Tree *tree_ptr, TreeNode *node_ptr, void *new_data );
+
 TreeNode *tree_get_root( Tree *tree_ptr );
 
 //! @brief Returns pointer to the left child of the node.
