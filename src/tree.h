@@ -46,9 +46,10 @@ enum TreeVerifyFlag
 //! is stored in the Tree struct.
 struct TreeNode
 {
-    void *data_ptr = NULL;
-    TreeNode *left = NULL;
-    TreeNode *right = NULL;
+    void *data_ptr      = NULL;
+    TreeNode *left      = NULL;
+    TreeNode *right     = NULL;
+    TreeNode *parent    = NULL;
 
     size_t level = 0;        //< Distance from the root node.
 

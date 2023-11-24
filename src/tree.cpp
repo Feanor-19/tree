@@ -9,7 +9,7 @@
 #include <unistd.h>
 
 
-static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data);
+static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data, TreeNode* parent);
 
 static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr );
 
@@ -78,7 +78,7 @@ TreeStatus tree_insert_root( Tree *tree_ptr, void *data )
     if (tree_ptr->root)
         return TREE_STATUS_WARNING_ROOT_ALREADY_EXISTS;
 
-    TreeNode *new_node = op_new_TreeNode(tree_ptr, data);
+    TreeNode *new_node = op_new_TreeNode(tree_ptr, data, NULL);
     if (!new_node)
         return TREE_STATUS_ERROR_MEM_ALLOC;
 
@@ -98,7 +98,7 @@ TreeStatus tree_insert_data_as_left_child( Tree *tree_ptr, TreeNode *node_ptr, v
     if ( node_ptr->left )
         return TREE_STATUS_WARNING_LEFT_CHILD_IS_OCCUPIED;
 
-    TreeNode *new_node = op_new_TreeNode(tree_ptr, data);
+    TreeNode *new_node = op_new_TreeNode(tree_ptr, data, node_ptr);
     if (!new_node)
         return TREE_STATUS_ERROR_MEM_ALLOC;
 
@@ -120,7 +120,7 @@ TreeStatus tree_insert_data_as_right_child( Tree *tree_ptr, TreeNode *node_ptr, 
     if ( node_ptr->right )
         return TREE_STATUS_WARNING_RIGHT_CHILD_IS_OCCUPIED;
 
-    TreeNode *new_node = op_new_TreeNode(tree_ptr, data);
+    TreeNode *new_node = op_new_TreeNode(tree_ptr, data, node_ptr);
     if (!new_node)
         return TREE_STATUS_ERROR_MEM_ALLOC;
 
@@ -234,7 +234,7 @@ int is_node_leaf( TreeNode* node_ptr)
     return ( !node_ptr->left && !node_ptr->right );
 }
 
-static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data )
+static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data, TreeNode* parent )
 {
     assert(data);
 
@@ -255,6 +255,8 @@ static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data )
         tmp->prev = new_node;
     }
 
+    new_node->parent = parent;
+
     tree_ptr->nodes_count++;
 
     return new_node;
@@ -267,9 +269,10 @@ static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
 
     if ( tree_ptr->data_dtor_func_ptr ) tree_ptr->data_dtor_func_ptr( node_ptr->data_ptr );
 
-    node_ptr->left = NULL;
-    node_ptr->right = NULL;
-    node_ptr->data_ptr = NULL;
+    node_ptr->left      = NULL;
+    node_ptr->right     = NULL;
+    node_ptr->data_ptr  = NULL;
+    node_ptr->parent    = NULL;
 
     TreeNode *next = node_ptr->next;
     TreeNode *prev = node_ptr->prev;
@@ -353,11 +356,11 @@ void tree_print_status_message( FILE *stream, TreeStatus status )
     fprintf(stream, "%s", tree_status_messages[status]);
 }
 
-inline size_t str_insert(  char *str_dest_begin,
-                    size_t str_dest_capacity,
-                    const char *str_source,
-                    size_t start_ind,
-                    int *res )
+inline size_t str_insert(   char *str_dest_begin,
+                            size_t str_dest_capacity,
+                            const char *str_source,
+                            size_t start_ind,
+                            int *res )
 {
     assert(str_dest_begin);
     assert(res);
