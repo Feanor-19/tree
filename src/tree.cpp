@@ -32,9 +32,9 @@ TreeStatus tree_ctor_( Tree *tree_ptr,
 
     tree_ptr->data_size             = data_size_in_bytes;
     tree_ptr->data_dtor_func_ptr    = data_dtor_func_ptr;
-    tree_ptr->nodes_count = 0;
-    tree_ptr->depth = 0;
-    tree_ptr->root = NULL;
+    tree_ptr->nodes_count           = 0;
+    tree_ptr->depth                 = 0;
+    tree_ptr->root                  = NULL;
 
 #ifdef TREE_DO_DUMP
     tree_ptr->print_data_func_ptr   = print_data_func_ptr;
@@ -518,7 +518,8 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
                         "label = \"");
     fprintf(dot_file,   "Tree[%p] (%s) declared in %s(%d), in function %s.\\n"
                         "TREE_DUMP() called from %s(%d), from function %s.\\n"
-                        "data_size: %llu; nodes_count: %llu;\\nroot: [%p];head_of_all_nodes: [%p].\\n",
+                        "data_size: %llu; nodes_count: %llu;\\nroot: [%p];head_of_all_nodes: [%p].\\n"
+                        "depth: %llu\\n",
                         tree_ptr,
                         tree_ptr->orig_info.name,
                         tree_ptr->orig_info.orig_file_name,
@@ -530,7 +531,8 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
                         tree_ptr->data_size,
                         tree_ptr->nodes_count,
                         tree_ptr->root,
-                        tree_ptr->head_of_all_nodes);
+                        tree_ptr->head_of_all_nodes,
+                        tree_ptr->depth);
     tree_print_verify_res(dot_file, verify_res);
     fprintf(dot_file, "\"]\n\n\n");
 

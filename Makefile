@@ -31,3 +31,8 @@ clean:
 .PHONY: clean_dumps
 clean_dumps:
 	rm -r -f $(DUMP_FOLDER)
+
+.PHONY: make_lib
+make_lib:
+	ar crf .\lib\libtree.a .\obj\tree.o
+

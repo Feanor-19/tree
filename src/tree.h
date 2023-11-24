@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+//TODO - добавить get_parent
+
 /*
     AVAILABLE DEFINES:
     - TREE_DO_DUMP
@@ -73,7 +75,7 @@ struct Tree
 
     size_t data_size    = 0;
     size_t nodes_count  = 0;
-    size_t depth        = 0;
+    size_t depth        = 0; // max level of all nodes; if only root exists, equals 0
 
     void (*data_dtor_func_ptr)(void *data_ptr) = NULL;
 
