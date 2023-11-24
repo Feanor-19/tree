@@ -70,8 +70,9 @@ struct Tree
 {
     TreeNode *root = NULL;
 
-    size_t data_size = 0;
-    size_t nodes_count = 0;
+    size_t data_size    = 0;
+    size_t nodes_count  = 0;
+    size_t depth        = 0;
 
     void (*data_dtor_func_ptr)(void *data_ptr) = NULL;
 

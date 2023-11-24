@@ -33,6 +33,7 @@ TreeStatus tree_ctor_( Tree *tree_ptr,
     tree_ptr->data_size             = data_size_in_bytes;
     tree_ptr->data_dtor_func_ptr    = data_dtor_func_ptr;
     tree_ptr->nodes_count = 0;
+    tree_ptr->depth = 0;
     tree_ptr->root = NULL;
 
 #ifdef TREE_DO_DUMP
@@ -57,6 +58,7 @@ TreeStatus tree_dtor( Tree *tree_ptr )
 
     tree_ptr->root                  = NULL;
     tree_ptr->nodes_count           = 0;
+    tree_ptr->depth                 = 0;
     tree_ptr->data_size             = 0;
     tree_ptr->data_dtor_func_ptr    = NULL;
 
@@ -101,6 +103,8 @@ TreeStatus tree_insert_data_as_left_child( Tree *tree_ptr, TreeNode *node_ptr, v
         return TREE_STATUS_ERROR_MEM_ALLOC;
 
     new_node->level = node_ptr->level + 1;
+    if (tree_ptr->depth < new_node->level)
+        tree_ptr->depth = new_node->level;
 
     node_ptr->left = new_node;
 
@@ -121,6 +125,8 @@ TreeStatus tree_insert_data_as_right_child( Tree *tree_ptr, TreeNode *node_ptr, 
         return TREE_STATUS_ERROR_MEM_ALLOC;
 
     new_node->level = node_ptr->level + 1;
+    if (tree_ptr->depth < new_node->level)
+        tree_ptr->depth = new_node->level;
 
     node_ptr->right = new_node;
 
@@ -613,6 +619,7 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
 #undef COLOR_EDGE_NEXT
 #undef COLOR_EDGE_FREE
 
+    free(nodes_arr);
 
     return TREE_STATUS_OK;
 }
