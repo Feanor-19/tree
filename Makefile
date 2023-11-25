@@ -34,7 +34,7 @@ clean_dumps:
 
 .PHONY: make_lib
 make_lib:
-	ar crf .\lib\libtree.a .\obj\tree.o
+	ar crf .\lib\libtree.a .\obj\tree.o .\obj\tree_dump.o
 
 .PHONY: copy_headers
 copy_headers:
