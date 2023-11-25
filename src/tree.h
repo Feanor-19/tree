@@ -68,7 +68,7 @@ TreeStatus tree_insert_data_as_right_child( Tree *tree_ptr, TreeNode *node_ptr, 
 //! @param [in] tree_ptr Tree pointer.
 //! @param [in] node_ptr Node which data must be recieved.
 //! @param [out] ret Pointer by which data must be written.
-TreeStatus tree_get_data( Tree *tree_ptr, TreeNode *node_ptr, void *ret );
+TreeStatus tree_get_data( const Tree *tree_ptr, const TreeNode *node_ptr, void *ret );
 
 TreeNode *tree_get_parent( TreeNode *node_ptr );
 

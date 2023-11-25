@@ -115,7 +115,7 @@ TreeStatus tree_insert_data_as_right_child( Tree *tree_ptr, TreeNode *node_ptr, 
     return TREE_STATUS_OK;
 }
 
-TreeStatus tree_get_data( Tree *tree_ptr, TreeNode *node_ptr, void *ret )
+TreeStatus tree_get_data( const Tree *tree_ptr, const TreeNode *node_ptr, void *ret )
 {
     TREE_SELFCHECK(tree_ptr);
     assert(node_ptr);
