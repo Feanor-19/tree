@@ -246,6 +246,34 @@ TreeStatus tree_copy( Tree *dest, const Tree *src )
     return TREE_STATUS_OK;
 }
 
+TreeStatus tree_copy_subtree_into_left( Tree *dest, TreeNode *dest_node, const TreeNode *src_subtree)
+{
+    assert(dest);
+    assert(dest_node);
+    assert(src_subtree);
+
+    if (dest_node->left)
+        return TREE_STATUS_WARNING_LEFT_CHILD_IS_OCCUPIED;
+
+    dest_node->left = tree_copy_node(dest, dest_node, src_subtree);
+
+    return TREE_STATUS_OK;
+}
+
+TreeStatus tree_copy_subtree_into_right( Tree *dest, TreeNode *dest_node, const TreeNode *src_subtree)
+{
+    assert(dest);
+    assert(dest_node);
+    assert(src_subtree);
+
+    if (dest_node->right)
+        return TREE_STATUS_WARNING_LEFT_CHILD_IS_OCCUPIED;
+
+    dest_node->right = tree_copy_node(dest, dest_node, src_subtree);
+
+    return TREE_STATUS_OK;
+}
+
 int is_node_leaf( TreeNode* node_ptr)
 {
     assert(node_ptr);

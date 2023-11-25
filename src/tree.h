@@ -228,6 +228,14 @@ TreeStatus tree_delete_right_child( Tree *tree_ptr, TreeNode *node_ptr );
 //! @brief Makes full copy of given tree 'source' and puts it by 'dest' pointer.
 TreeStatus tree_copy( Tree *dest, const Tree *source );
 
+//! @brief Copies full subtree, in which 'src_subtree' plays role of the root,
+//! and inserts it as the left child of 'dest_node', belonging to tree 'dest'.
+TreeStatus tree_copy_subtree_into_left( Tree *dest, TreeNode *dest_node, const TreeNode *src_subtree);
+
+//! @brief Copies full subtree, in which 'src_subtree' plays role of the root,
+//! and inserts it as the right child of 'dest_node', belonging to tree 'dest'.
+TreeStatus tree_copy_subtree_into_right( Tree *dest, TreeNode *dest_node, const TreeNode *src_subtree);
+
 //! @brief Returns 1 if node has no children, 0 otherwise.
 int is_node_leaf( TreeNode* node_ptr);
 
