@@ -36,3 +36,6 @@ clean_dumps:
 make_lib:
 	ar crf .\lib\libtree.a .\obj\tree.o
 
+.PHONY: copy_headers
+copy_headers:
+	cp ./src/*.h ./../../mylibheaders/
