@@ -75,7 +75,7 @@ struct Tree
 
     size_t data_size    = 0;
     size_t nodes_count  = 0;
-    size_t depth        = 0; // max level of all nodes; if only root exists, equals 0
+    size_t depth        = 0; //< max level of all nodes; if only root exists, equals 0
 
     void (*data_dtor_func_ptr)(void *data_ptr) = NULL;
 
@@ -152,7 +152,7 @@ TreeStatus tree_dtor( Tree *tree_ptr );
 
 #ifdef TREE_DO_DUMP
 
-void tree_dump_( Tree *tree_ptr,
+void tree_dump_( const Tree *tree_ptr,
                  tree_verify_t verify_res,
                  const char *file,
                  const int line,
@@ -224,6 +224,9 @@ TreeStatus tree_delete_left_child( Tree *tree_ptr, TreeNode *node_ptr );
 
 //! @brief Deletes specified child of the node if it is a leaf, returns errors and does nothing otherwise.
 TreeStatus tree_delete_right_child( Tree *tree_ptr, TreeNode *node_ptr );
+
+//! @brief Makes full copy of given tree 'source' and puts it by 'dest' pointer.
+TreeStatus tree_copy( Tree *dest, const Tree *source );
 
 //! @brief Returns 1 if node has no children, 0 otherwise.
 int is_node_leaf( TreeNode* node_ptr);

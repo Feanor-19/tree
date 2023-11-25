@@ -15,7 +15,7 @@ static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr );
 
 static void tree_print_verify_res(FILE *stream, tree_verify_t verify_res);
 
-static tree_verify_t tree_verify( Tree *tree_ptr );
+static tree_verify_t tree_verify( const Tree *tree_ptr );
 
 
 TreeStatus tree_ctor_( Tree *tree_ptr,
@@ -82,8 +82,6 @@ TreeStatus tree_insert_root( Tree *tree_ptr, void *data )
     if (!new_node)
         return TREE_STATUS_ERROR_MEM_ALLOC;
 
-    new_node->level = 0;
-
     tree_ptr->root = new_node;
 
     return TREE_STATUS_OK;
@@ -102,10 +100,6 @@ TreeStatus tree_insert_data_as_left_child( Tree *tree_ptr, TreeNode *node_ptr, v
     if (!new_node)
         return TREE_STATUS_ERROR_MEM_ALLOC;
 
-    new_node->level = node_ptr->level + 1;
-    if (tree_ptr->depth < new_node->level)
-        tree_ptr->depth = new_node->level;
-
     node_ptr->left = new_node;
 
     return TREE_STATUS_OK;
@@ -123,10 +117,6 @@ TreeStatus tree_insert_data_as_right_child( Tree *tree_ptr, TreeNode *node_ptr, 
     TreeNode *new_node = op_new_TreeNode(tree_ptr, data, node_ptr);
     if (!new_node)
         return TREE_STATUS_ERROR_MEM_ALLOC;
-
-    new_node->level = node_ptr->level + 1;
-    if (tree_ptr->depth < new_node->level)
-        tree_ptr->depth = new_node->level;
 
     node_ptr->right = new_node;
 
@@ -227,6 +217,35 @@ TreeStatus tree_delete_right_child( Tree *tree_ptr, TreeNode *node_ptr )
     return TREE_STATUS_OK;
 }
 
+inline TreeNode *tree_copy_node( Tree *dest, TreeNode* parent, const TreeNode *src )
+{
+    assert(src);
+
+    TreeNode *node = op_new_TreeNode( dest, src->data_ptr, parent );
+
+    if (src->left)
+        node->left = tree_copy_node( dest, node, src->left );
+
+    if (src->right)
+        node->right = tree_copy_node( dest, node, src->right );
+
+    return node;
+}
+
+TreeStatus tree_copy( Tree *dest, const Tree *src )
+{
+    assert(src);
+    assert(dest);
+    TREE_SELFCHECK(src);
+
+    tree_ctor(dest, src->data_size, src->data_dtor_func_ptr, src->print_data_func_ptr);
+
+    if (src->root)
+        dest->root = tree_copy_node( dest, NULL, src->root );
+
+    return TREE_STATUS_OK;
+}
+
 int is_node_leaf( TreeNode* node_ptr)
 {
     assert(node_ptr);
@@ -256,6 +275,14 @@ static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data, TreeNode* parent )
     }
 
     new_node->parent = parent;
+
+    if (parent)
+        new_node->level = parent->level + 1;
+    else
+        new_node->level = 0;
+
+    if (tree_ptr->depth < new_node->level)
+        tree_ptr->depth = new_node->level;
 
     tree_ptr->nodes_count++;
 
@@ -295,7 +322,7 @@ static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
 }
 
 #ifdef TREE_DO_DUMP
-inline int verify_check_nodes_count( Tree *tree_ptr )
+inline int verify_check_nodes_count( const Tree *tree_ptr )
 {
     assert(tree_ptr);
 
@@ -311,7 +338,7 @@ inline int verify_check_nodes_count( Tree *tree_ptr )
     return nodes_count == tree_ptr->nodes_count;
 }
 
-inline int verify_check_nodes_data_pointer( Tree *tree_ptr )
+inline int verify_check_nodes_data_pointer( const Tree *tree_ptr )
 {
     assert(tree_ptr);
 
@@ -327,7 +354,7 @@ inline int verify_check_nodes_data_pointer( Tree *tree_ptr )
 }
 
 #define DEF_TREE_VERIFY_FLAG(name, message, cond) {if ((cond)) {verify_res |= (1 << (bit));} bit++;}
-static tree_verify_t tree_verify( Tree *tree_ptr )
+static tree_verify_t tree_verify( const Tree *tree_ptr )
 {
     tree_verify_t verify_res = 0;
 
@@ -486,7 +513,7 @@ inline TreeStatus create_tmp_dot_file_( const char *dot_file_path, FILE **ret_pt
 }
 
 inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
-                                            Tree *tree_ptr,
+                                            const Tree *tree_ptr,
                                             tree_verify_t verify_res,
                                             const char *called_from_file,
                                             const int called_from_line,
@@ -668,7 +695,7 @@ inline TreeStatus free_dot_file_( FILE * dot_tmp_file )
     return TREE_STATUS_OK;
 }
 
-void tree_dump_( Tree *tree_ptr,
+void tree_dump_( const Tree *tree_ptr,
                  tree_verify_t verify_res,
                  const char *file,
                  const int line,

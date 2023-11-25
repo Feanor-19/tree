@@ -35,13 +35,14 @@ int main()
 
     TREE_DUMP(&tree, 0);
 
-    tree_delete_left_child(&tree, node1);
+    Tree copy = {};
+    tree_copy(&copy, &tree);
 
-    tree_delete_left_child(&tree, tree_get_right_child(node2));
-
-    TREE_DUMP(&tree, 0);
+    TREE_DUMP(&copy, 0);
 
     tree_dtor(&tree);
+
+    tree_dtor(&copy);
 
     return 0;
 }
