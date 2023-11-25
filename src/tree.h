@@ -70,6 +70,9 @@ TreeStatus tree_insert_data_as_right_child( Tree *tree_ptr, TreeNode *node_ptr, 
 //! @param [out] ret Pointer by which data must be written.
 TreeStatus tree_get_data( const Tree *tree_ptr, const TreeNode *node_ptr, void *ret );
 
+//! @brief Returns pointer to data, stored in the given node.
+void *tree_get_data_ptr( const TreeNode *node_ptr );
+
 TreeNode *tree_get_parent( TreeNode *node_ptr );
 
 TreeStatus tree_change_data( Tree *tree_ptr, TreeNode *node_ptr, void *new_data );

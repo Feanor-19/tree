@@ -126,6 +126,13 @@ TreeStatus tree_get_data( const Tree *tree_ptr, const TreeNode *node_ptr, void *
     return TREE_STATUS_OK;
 }
 
+void *tree_get_data_ptr( const TreeNode *node_ptr )
+{
+    assert(node_ptr);
+
+    return node_ptr->data_ptr;
+}
+
 TreeNode *tree_get_parent( TreeNode *node_ptr )
 {
     assert(node_ptr);
