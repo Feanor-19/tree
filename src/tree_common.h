@@ -12,7 +12,7 @@
 */
 #define TREE_DO_DUMP
 #define TREE_SHOW_DUMP_IMG
-
+// TODO - делать разные версии касательно включения/выключения дефайнов
 
 #ifdef TREE_DO_DUMP
 typedef uint64_t tree_verify_t;

@@ -73,17 +73,17 @@ TreeStatus tree_get_data( const Tree *tree_ptr, const TreeNode *node_ptr, void *
 //! @brief Returns pointer to data, stored in the given node.
 void *tree_get_data_ptr( const TreeNode *node_ptr );
 
-TreeNode *tree_get_parent( TreeNode *node_ptr );
+TreeNode *tree_get_parent( const TreeNode *node_ptr );
 
 TreeStatus tree_change_data( Tree *tree_ptr, TreeNode *node_ptr, void *new_data );
 
-TreeNode *tree_get_root( Tree *tree_ptr );
+TreeNode *tree_get_root( const Tree *tree_ptr );
 
 //! @brief Returns pointer to the left child of the node.
-TreeNode* tree_get_left_child( TreeNode *node_ptr );
+TreeNode* tree_get_left_child( const TreeNode *node_ptr );
 
 //! @brief Returns pointer to the right child of the node.
-TreeNode* tree_get_right_child( TreeNode *node_ptr );
+TreeNode* tree_get_right_child( const TreeNode *node_ptr );
 
 TreeStatus tree_delete_root( Tree *tree_ptr );
 
@@ -105,6 +105,6 @@ TreeStatus tree_copy_subtree_into_left( Tree *dest, TreeNode *dest_node, const T
 TreeStatus tree_copy_subtree_into_right( Tree *dest, TreeNode *dest_node, const TreeNode *src_subtree);
 
 //! @brief Returns 1 if node has no children, 0 otherwise.
-int is_node_leaf( TreeNode* node_ptr);
+int is_node_leaf( const TreeNode* node_ptr);
 
 #endif /* TREE_H */

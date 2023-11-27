@@ -133,7 +133,7 @@ void *tree_get_data_ptr( const TreeNode *node_ptr )
     return node_ptr->data_ptr;
 }
 
-TreeNode *tree_get_parent( TreeNode *node_ptr )
+TreeNode *tree_get_parent( const TreeNode *node_ptr )
 {
     assert(node_ptr);
     return node_ptr->parent;
@@ -151,21 +151,21 @@ TreeStatus tree_change_data( Tree *tree_ptr, TreeNode *node_ptr, void *new_data 
     return TREE_STATUS_OK;
 }
 
-TreeNode *tree_get_root( Tree *tree_ptr )
+TreeNode *tree_get_root( const Tree *tree_ptr )
 {
     assert(tree_ptr);
 
     return tree_ptr->root;
 }
 
-TreeNode* tree_get_left_child( TreeNode *node_ptr )
+TreeNode* tree_get_left_child( const TreeNode *node_ptr )
 {
     assert(node_ptr);
 
     return node_ptr->left;
 }
 
-TreeNode* tree_get_right_child( TreeNode *node_ptr )
+TreeNode* tree_get_right_child( const TreeNode *node_ptr )
 {
     assert(node_ptr);
 
@@ -279,7 +279,7 @@ TreeStatus tree_copy_subtree_into_right( Tree *dest, TreeNode *dest_node, const 
     return TREE_STATUS_OK;
 }
 
-int is_node_leaf( TreeNode* node_ptr)
+int is_node_leaf( const TreeNode* node_ptr)
 {
     assert(node_ptr);
 
