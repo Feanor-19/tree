@@ -145,7 +145,7 @@ TreeStatus tree_change_data( Tree *tree_ptr, TreeNode *node_ptr, void *new_data 
     assert(node_ptr);
     assert(new_data);
 
-    tree_ptr->data_dtor_func_ptr(node_ptr->data_ptr);
+    if (tree_ptr->data_dtor_func_ptr) tree_ptr->data_dtor_func_ptr(node_ptr->data_ptr);
     memcpy( node_ptr->data_ptr, new_data, tree_ptr->data_size );
 
     return TREE_STATUS_OK;

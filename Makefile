@@ -39,3 +39,8 @@ make_lib:
 .PHONY: copy_headers
 copy_headers:
 	cp ./src/*.h ./../../mylibheaders/
+
+.PHONY: copy_to_libs
+copy_to_libs:
+	cp ./src/*.h ./../../mylibs/tree/headers
+	cp ./lib/libtree.a ./../../mylibs/tree/bin
