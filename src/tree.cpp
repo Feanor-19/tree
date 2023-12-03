@@ -395,6 +395,29 @@ TreeStatus tree_migrate_into_root( Tree *tree_ptr, TreeNode *migr_node )
     return TREE_STATUS_OK;
 }
 
+TreeStatus tree_delete_subtree( Tree *tree_ptr, TreeNode *subtree )
+{
+    TREE_SELFCHECK(tree_ptr);
+    assert(subtree);
+
+    if ( subtree->left )
+    {
+        TreeStatus err = tree_delete_subtree( tree_ptr, subtree->left );
+        if (err)
+            return err;
+    }
+    if ( subtree->right )
+    {
+        TreeStatus err = tree_delete_subtree( tree_ptr, subtree->right );
+        if (err)
+            return err;
+    }
+
+    op_del_TreeNode(tree_ptr, subtree);
+
+    return TREE_STATUS_OK;
+}
+
 int is_node_leaf( const TreeNode* node_ptr)
 {
     assert(node_ptr);
@@ -444,6 +467,11 @@ static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
     assert(node_ptr);
 
     if ( tree_ptr->data_dtor_func_ptr ) tree_ptr->data_dtor_func_ptr( node_ptr->data_ptr );
+
+    if      ( node_ptr->parent && node_ptr->parent->left == node_ptr )
+        node_ptr->parent->left = NULL;
+    else if ( node_ptr->parent && node_ptr->parent->left == node_ptr )
+        node_ptr->parent->right = NULL;
 
     node_ptr->left      = NULL;
     node_ptr->right     = NULL;

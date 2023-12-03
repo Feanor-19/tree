@@ -121,6 +121,8 @@ TreeStatus tree_migrate_into_right( Tree *tree_ptr, TreeNode *dest_node, TreeNod
 //! @brief The whole tree is replaced with the subtree, which starts with 'migr_node'.
 TreeStatus tree_migrate_into_root( Tree *tree_ptr, TreeNode *migr_node );
 
+TreeStatus tree_delete_subtree( Tree *tree_ptr, TreeNode *subtree );
+
 void update_all_tree_levels( Tree *tree_ptr, TreeNode *curr_node = NULL, size_t curr_level = 0 );
 
 //! @brief Returns 1 if node has no children, 0 otherwise.
