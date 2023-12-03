@@ -470,7 +470,7 @@ static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
 
     if      ( node_ptr->parent && node_ptr->parent->left == node_ptr )
         node_ptr->parent->left = NULL;
-    else if ( node_ptr->parent && node_ptr->parent->left == node_ptr )
+    else if ( node_ptr->parent && node_ptr->parent->right == node_ptr )
         node_ptr->parent->right = NULL;
 
     node_ptr->left      = NULL;
