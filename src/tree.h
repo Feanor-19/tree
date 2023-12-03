@@ -118,6 +118,9 @@ TreeStatus tree_migrate_into_left( Tree *tree_ptr, TreeNode *dest_node, TreeNode
 //! @note ATTENTION! 'dest_node' MUST NOT BE LOCATED IN ANY OF 'migr_node' SUBTREES!
 TreeStatus tree_migrate_into_right( Tree *tree_ptr, TreeNode *dest_node, TreeNode *migr_node );
 
+//! @brief The whole tree is replaced with the subtree, which starts with 'migr_node'.
+TreeStatus tree_migrate_into_root( Tree *tree_ptr, TreeNode *migr_node );
+
 void update_all_tree_levels( Tree *tree_ptr, TreeNode *curr_node = NULL, size_t curr_level = 0 );
 
 //! @brief Returns 1 if node has no children, 0 otherwise.

@@ -380,6 +380,21 @@ TreeStatus tree_migrate_into_right( Tree *tree_ptr, TreeNode *dest_node, TreeNod
     return TREE_STATUS_OK;
 }
 
+TreeStatus tree_migrate_into_root( Tree *tree_ptr, TreeNode *migr_node )
+{
+    TREE_SELFCHECK(tree_ptr);
+    assert(migr_node);
+
+    del_rec( tree_ptr, tree_get_root(tree_ptr), migr_node );
+
+    migr_node->parent = NULL;
+    tree_ptr->root = migr_node;
+
+    update_all_tree_levels(tree_ptr);
+
+    return TREE_STATUS_OK;
+}
+
 int is_node_leaf( const TreeNode* node_ptr)
 {
     assert(node_ptr);

@@ -35,7 +35,7 @@ int main()
 
     TREE_DUMP(&tree, 0);
 
-    tree_migrate_into_right( &tree, node2, tree_get_left_child(node5) );
+    tree_migrate_into_root( &tree, node1 );
 
     TREE_DUMP(&tree, 0);
 
