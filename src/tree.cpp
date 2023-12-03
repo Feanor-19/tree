@@ -279,6 +279,107 @@ TreeStatus tree_copy_subtree_into_right( Tree *dest, TreeNode *dest_node, const 
     return TREE_STATUS_OK;
 }
 
+//! @note Returns 1 if the 'except_node' is in the to be deleted subtree, 0 otherwise.
+inline int del_rec( Tree *tree_ptr, TreeNode *start_with, TreeNode* except_node )
+{
+    assert(tree_ptr);
+    assert(start_with);
+    assert(except_node);
+
+    int except_node_found = 0;
+
+    if ( start_with->left && start_with->left != except_node )
+        except_node_found |= del_rec( tree_ptr, start_with->left, except_node );
+    else if ( start_with->left == except_node )
+        except_node_found |= 1;
+
+    start_with->left = NULL;
+
+    if ( start_with->right && start_with->right != except_node )
+        except_node_found |= del_rec( tree_ptr, start_with->right, except_node );
+    else if ( start_with->right == except_node )
+        except_node_found |= 1;
+    start_with->right = NULL;
+
+    op_del_TreeNode( tree_ptr, start_with );
+
+    return except_node_found;
+}
+
+void update_all_tree_levels( Tree *tree_ptr, TreeNode *curr_node, size_t curr_level )
+{
+    assert(tree_ptr);
+
+    if (curr_node == NULL)
+    {
+        curr_node = tree_get_root( tree_ptr );
+        curr_level = 0;
+        tree_ptr->depth = 0;
+    }
+
+    curr_node->level = curr_level;
+    if ( tree_ptr->depth < curr_level )
+        tree_ptr->depth = curr_level;
+
+    if ( curr_node->left )
+        update_all_tree_levels( tree_ptr, curr_node->left, curr_level + 1 );
+
+    if ( curr_node->right)
+        update_all_tree_levels( tree_ptr, curr_node->right, curr_level + 1 );
+}
+
+TreeStatus tree_migrate_into_left( Tree *tree_ptr, TreeNode *dest_node, TreeNode *migr_node )
+{
+    TREE_SELFCHECK(tree_ptr);
+    assert(dest_node);
+    assert(migr_node);
+
+    int migr_node_found = 0;
+    if (dest_node->left)
+        migr_node_found = del_rec( tree_ptr, dest_node->left, migr_node );
+
+    if (!migr_node_found && migr_node->parent)
+    {
+        if      (migr_node->parent->left == migr_node)
+            migr_node->parent->left = NULL;
+        else if (migr_node->parent->right == migr_node)
+            migr_node->parent->right = NULL;
+    }
+
+    dest_node->left     = migr_node;
+    migr_node->parent   = dest_node;
+
+    update_all_tree_levels( tree_ptr );
+
+    return TREE_STATUS_OK;
+}
+
+TreeStatus tree_migrate_into_right( Tree *tree_ptr, TreeNode *dest_node, TreeNode *migr_node )
+{
+    TREE_SELFCHECK(tree_ptr);
+    assert(dest_node);
+    assert(migr_node);
+
+    int migr_node_found = 0;
+    if (dest_node->right)
+        migr_node_found = del_rec( tree_ptr, dest_node->right, migr_node );
+
+    if (!migr_node_found && migr_node->parent)
+    {
+        if      (migr_node->parent->left == migr_node)
+            migr_node->parent->left = NULL;
+        else if (migr_node->parent->right == migr_node)
+            migr_node->parent->right = NULL;
+    }
+
+    dest_node->right    = migr_node;
+    migr_node->parent   = dest_node;
+
+    update_all_tree_levels( tree_ptr );
+
+    return TREE_STATUS_OK;
+}
+
 int is_node_leaf( const TreeNode* node_ptr)
 {
     assert(node_ptr);

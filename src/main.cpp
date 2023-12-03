@@ -35,31 +35,13 @@ int main()
 
     TREE_DUMP(&tree, 0);
 
-    Tree tree19 = {};
+    tree_migrate_into_right( &tree, node2, tree_get_left_child(node5) );
 
-    tree_ctor(&tree19, sizeof(int), int_dtor, int_print);
-
-    tree_insert_root( &tree19, &arr[10] );
-
-    TreeNode *tree19_root = tree_get_root(&tree19);
-
-    tree_insert_data_as_left_child( &tree19, tree19_root, &arr[9] );
-
-    TREE_DUMP(&tree19, 0);
-
-    tree_copy_subtree_into_right( &tree19, tree19_root, node1 );
-
-    TREE_DUMP(&tree19, 0);
-
-    tree_insert_data_as_left_child( &tree19,
-                                    tree_get_left_child( tree_get_right_child( tree19_root ) ),
-                                    &arr[7] );
-
-    TREE_DUMP(&tree19, 0);
+    TREE_DUMP(&tree, 0);
 
     tree_dtor(&tree);
 
-    tree_dtor(&tree19);
+    printf("all is ok\n");
 
     return 0;
 }

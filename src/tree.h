@@ -104,6 +104,22 @@ TreeStatus tree_copy_subtree_into_left( Tree *dest, TreeNode *dest_node, const T
 //! and inserts it as the right child of 'dest_node', belonging to tree 'dest'.
 TreeStatus tree_copy_subtree_into_right( Tree *dest, TreeNode *dest_node, const TreeNode *src_subtree);
 
+//! @brief Hangs the subtree, which starts with 'migr_node', as the left child of the 'dest_node'.
+//! @note Deletes the whole left subtree of the 'dest_node'! BUT, the 'migr_node' is allowed
+//! to be located in the left subtree of the 'dest_node'.
+//! @note ATTENTION! 'migr_node' and 'dest_node' must belong to the same tree!
+//! @note ATTENTION! 'dest_node' MUST NOT BE LOCATED IN ANY OF 'migr_node' SUBTREES!
+TreeStatus tree_migrate_into_left( Tree *tree_ptr, TreeNode *dest_node, TreeNode *migr_node );
+
+//! @brief Hangs the subtree, which starts with 'migr_node', as the right child of the 'dest_node'.
+//! @note Deletes the whole right subtree of the 'dest_node'! BUT, the 'migr_node' is allowed
+//! to be located in the right subtree of the 'dest_node'.
+//! @note ATTENTION! 'migr_node' and 'dest_node' must belong to the same tree!
+//! @note ATTENTION! 'dest_node' MUST NOT BE LOCATED IN ANY OF 'migr_node' SUBTREES!
+TreeStatus tree_migrate_into_right( Tree *tree_ptr, TreeNode *dest_node, TreeNode *migr_node );
+
+void update_all_tree_levels( Tree *tree_ptr, TreeNode *curr_node = NULL, size_t curr_level = 0 );
+
 //! @brief Returns 1 if node has no children, 0 otherwise.
 int is_node_leaf( const TreeNode* node_ptr);
 
