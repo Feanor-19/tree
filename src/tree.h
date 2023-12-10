@@ -123,7 +123,28 @@ TreeStatus tree_migrate_into_root( Tree *tree_ptr, TreeNode *migr_node );
 
 TreeStatus tree_delete_subtree( Tree *tree_ptr, TreeNode *subtree );
 
-void update_all_tree_levels( Tree *tree_ptr, TreeNode *curr_node = NULL, size_t curr_level = 0 );
+//! @brief Hangs specified 'loose_node' as the left child of the 'parent_node'.
+//! @note ATTENTION: 'loose_node' must be created using 'op_new_TreeNode' for the same tree
+//! and it mustn't be a child of any other node in the tree!
+TreeStatus tree_hang_loose_node_at_left( Tree *tree_ptr, TreeNode *loose_node, TreeNode *parent_node );
+
+//! @brief Hangs specified 'loose_node' as the right child of the 'parent_node'.
+//! @note ATTENTION: 'loose_node' must be created using 'op_new_TreeNode' for the same tree
+//! and it mustn't be a child of any other node in the tree!
+TreeStatus tree_hang_loose_node_at_right( Tree *tree_ptr, TreeNode *loose_node, TreeNode *parent_node );
+
+//! @brief Hangs specified 'loose_node' as the root of the tree.
+//! @note ATTENTION: 'loose_node' must be created using 'op_new_TreeNode' for the same tree
+//! and it mustn't be a child of any other node in the tree!
+TreeStatus tree_hang_loose_node_as_root( Tree *tree_ptr, TreeNode *loose_node);
+
+void tree_update_all_tree_levels( Tree *tree_ptr, TreeNode *curr_node = NULL, size_t curr_level = 0 );
+
+//! @note ATTENTION: USE ONLY IF YOU DO KNOW WHAT YOU ARE DOING!
+TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data, TreeNode* parent = NULL);
+
+//! @note ATTENTION: USE ONLY IF YOU DO KNOW WHAT YOU ARE DOING!
+void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr );
 
 //! @brief Returns 1 if node has no children, 0 otherwise.
 int is_node_leaf( const TreeNode* node_ptr);

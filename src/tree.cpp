@@ -6,10 +6,6 @@
 #include <memory.h>
 
 
-static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data, TreeNode* parent);
-static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr );
-
-
 TreeStatus tree_ctor_( Tree *tree_ptr,
                        size_t data_size_in_bytes,
 #ifdef TREE_DO_DUMP
@@ -306,7 +302,7 @@ inline int del_rec( Tree *tree_ptr, TreeNode *start_with, TreeNode* except_node 
     return except_node_found;
 }
 
-void update_all_tree_levels( Tree *tree_ptr, TreeNode *curr_node, size_t curr_level )
+void tree_update_all_tree_levels( Tree *tree_ptr, TreeNode *curr_node, size_t curr_level )
 {
     assert(tree_ptr);
 
@@ -322,10 +318,10 @@ void update_all_tree_levels( Tree *tree_ptr, TreeNode *curr_node, size_t curr_le
         tree_ptr->depth = curr_level;
 
     if ( curr_node->left )
-        update_all_tree_levels( tree_ptr, curr_node->left, curr_level + 1 );
+        tree_update_all_tree_levels( tree_ptr, curr_node->left, curr_level + 1 );
 
     if ( curr_node->right)
-        update_all_tree_levels( tree_ptr, curr_node->right, curr_level + 1 );
+        tree_update_all_tree_levels( tree_ptr, curr_node->right, curr_level + 1 );
 }
 
 TreeStatus tree_migrate_into_left( Tree *tree_ptr, TreeNode *dest_node, TreeNode *migr_node )
@@ -349,7 +345,7 @@ TreeStatus tree_migrate_into_left( Tree *tree_ptr, TreeNode *dest_node, TreeNode
     dest_node->left     = migr_node;
     migr_node->parent   = dest_node;
 
-    update_all_tree_levels( tree_ptr );
+    tree_update_all_tree_levels( tree_ptr );
 
     return TREE_STATUS_OK;
 }
@@ -375,7 +371,7 @@ TreeStatus tree_migrate_into_right( Tree *tree_ptr, TreeNode *dest_node, TreeNod
     dest_node->right    = migr_node;
     migr_node->parent   = dest_node;
 
-    update_all_tree_levels( tree_ptr );
+    tree_update_all_tree_levels( tree_ptr );
 
     return TREE_STATUS_OK;
 }
@@ -390,7 +386,7 @@ TreeStatus tree_migrate_into_root( Tree *tree_ptr, TreeNode *migr_node )
     migr_node->parent = NULL;
     tree_ptr->root = migr_node;
 
-    update_all_tree_levels(tree_ptr);
+    tree_update_all_tree_levels(tree_ptr);
 
     return TREE_STATUS_OK;
 }
@@ -418,6 +414,46 @@ TreeStatus tree_delete_subtree( Tree *tree_ptr, TreeNode *subtree )
     return TREE_STATUS_OK;
 }
 
+TreeStatus tree_hang_loose_node_at_left( Tree *tree_ptr, TreeNode *loose_node, TreeNode *parent_node )
+{
+    if ( parent_node->left )
+        return TREE_STATUS_WARNING_LEFT_CHILD_IS_OCCUPIED;
+
+    parent_node->left = loose_node;
+    loose_node->parent = parent_node;
+
+    tree_update_all_tree_levels( tree_ptr, loose_node, parent_node->level + 1 );
+
+    return TREE_STATUS_OK;
+}
+
+TreeStatus tree_hang_loose_node_at_right( Tree *tree_ptr, TreeNode *loose_node, TreeNode *parent_node )
+{
+    if ( parent_node->right )
+        return TREE_STATUS_WARNING_RIGHT_CHILD_IS_OCCUPIED;
+
+    parent_node->right = loose_node;
+    loose_node->parent = parent_node;
+
+    tree_update_all_tree_levels( tree_ptr, loose_node, parent_node->level + 1 );
+
+    return TREE_STATUS_OK;
+}
+
+TreeStatus tree_hang_loose_node_as_root( Tree *tree_ptr, TreeNode *loose_node)
+{
+    if ( tree_ptr->root )
+        return TREE_STATUS_WARNING_ROOT_ALREADY_EXISTS;
+
+    tree_ptr->root = loose_node;
+    loose_node->parent = NULL;
+
+    tree_update_all_tree_levels( tree_ptr );
+
+    return TREE_STATUS_OK;
+}
+
+
 int is_node_leaf( const TreeNode* node_ptr)
 {
     assert(node_ptr);
@@ -425,7 +461,7 @@ int is_node_leaf( const TreeNode* node_ptr)
     return ( !node_ptr->left && !node_ptr->right );
 }
 
-static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data, TreeNode* parent )
+TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data, TreeNode* parent )
 {
     assert(data);
 
@@ -461,7 +497,7 @@ static TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data, TreeNode* parent )
     return new_node;
 }
 
-static void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
+void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
 {
     assert(tree_ptr);
     assert(node_ptr);
