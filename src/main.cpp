@@ -33,9 +33,9 @@ int main()
 
     tree_hang_loose_node_at_left( &tree, node6, node5 );
 
-    tree_hang_loose_node_at_left( &tree, node3, node4 );
+    // tree_hang_loose_node_at_left( &tree, node3, node4 );
 
-    tree_hang_loose_node_as_root( &tree, node4 );
+    // tree_hang_loose_node_as_root( &tree, node4 );
 
     TREE_DUMP(&tree, 0);
 

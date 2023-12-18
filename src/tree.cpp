@@ -309,6 +309,8 @@ void tree_update_all_tree_levels( Tree *tree_ptr, TreeNode *curr_node, size_t cu
     if (curr_node == NULL)
     {
         curr_node = tree_get_root( tree_ptr );
+        if (!curr_node)
+            return;
         curr_level = 0;
         tree_ptr->depth = 0;
     }
