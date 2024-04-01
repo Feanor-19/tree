@@ -71,10 +71,14 @@ TreeAllocRes _tree_alloc_init( size_t tree_node_with_data_size, size_t mem_pool_
     MEM_POOLS = (MemPool*) calloc( 1, sizeof(MemPool) );
     if ( MEM_POOLS == NULL ) return TREE_ALLOC_ERR_CANT_ALLOC_MEM;
 
-    BLOCK_SIZE = tree_node_with_data_size;
+    // we are going to store size_t in free blocks, so we should align it with some 'filling'
+    size_t mod = tree_node_with_data_size % sizeof(size_t);
+    size_t filling = (mod == 0 ? 0 : sizeof(size_t) - mod);
+
+    BLOCK_SIZE = tree_node_with_data_size + filling;
     MEM_POOL_SIZE = mem_pool_size;
 
-    MEM_POOLS[0].mempool = (byte *) calloc( mem_pool_size, BLOCK_SIZE );
+    MEM_POOLS[0].mempool = (byte *) calloc( MEM_POOL_SIZE, BLOCK_SIZE );
 
     if ( MEM_POOLS[0].mempool == NULL )
     {
@@ -106,6 +110,19 @@ void* _tree_alloc_new()
 
     //if (all_memory_pools_full) ; // TODO - create new memory pool
     // set free_mem_pool_id to id of the new mem pool
+    if ( all_memory_pools_full ) 
+    {
+        MemPool* new_MEM_POOLS = (MemPool*) realloc( MEM_POOLS, (MEM_POOLS_COUNT+1)*sizeof(MemPool) );
+        if (!new_MEM_POOLS) return NULL;
+        
+        MEM_POOLS = new_MEM_POOLS;
+        MEM_POOLS_COUNT++;
+
+        MEM_POOLS[MEM_POOLS_COUNT-1].mempool = (byte *) calloc( MEM_POOL_SIZE, BLOCK_SIZE );
+        if ( !MEM_POOLS[MEM_POOLS_COUNT-1].mempool ) return NULL;
+    
+        init_mem_pool( MEM_POOLS_COUNT-1 );
+    }
 
     size_t old_free_ptr = MEM_POOLS[ free_mem_pool_id ].free_elem_ind;
     size_t new_free_ptr = ACCESS_FREE_MEM_BLOCK( free_mem_pool_id, old_free_ptr );
