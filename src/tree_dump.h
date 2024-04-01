@@ -3,10 +3,10 @@
 
 #include "tree_common.h"
 
-void tree_print_verify_res(FILE *stream, tree_verify_t verify_res);
-tree_verify_t tree_verify( const Tree *tree_ptr );
 
 #ifdef TREE_DO_DUMP
+    tree_verify_t tree_verify( const Tree *tree_ptr );
+    void tree_print_verify_res(FILE *stream, tree_verify_t verify_res);
     void tree_dump_( const Tree *tree_ptr,
                     tree_verify_t verify_res,
                     const char *file,

@@ -19,10 +19,10 @@ TreeStatus tree_ctor_( Tree *tree_ptr,
 //! @param [in] data_size_in_bytes Size in bytes of one element to be stored in the tree.
 //! @param [in] data_dtor_func_ptr Pointer to deconstructor of elememts to be stored in the tree.
 //! void data_dtor(void *data_ptr)
-//! @param [in] typical_num_of_nodes Expectd maximum number of nodes in the tree (might be exceeded).
+//! @param [in] typical_num_of_nodes Expected maximum number of nodes in the tree (might be exceeded).
 //! @param [in] print_data_func_ptr Pointer to function, printing element.
 //! void data_print(FILE *stream, void *data_ptr).
-#define tree_ctor( tree_ptr, data_size_in_bytes, data_dtor_func_ptr, typical_num_of_nodes, print_data_func_ptr ) \
+#define tree_ctor( tree_ptr, data_size_in_bytes, typical_num_of_nodes, data_dtor_func_ptr, print_data_func_ptr ) \
     tree_ctor_  (   tree_ptr,               \
                     data_size_in_bytes,     \
                     print_data_func_ptr,    \
@@ -38,11 +38,11 @@ TreeStatus tree_ctor_( Tree *tree_ptr,
 #else /* NOT TREE_DO_DUMP */
 //! @param [in] tree_ptr Tree pointer.
 //! @param [in] data_size_in_bytes Size in bytes of one element to be stored in the tree.
-//! @param [in] typical_num_of_nodes Expectd maximum number of nodes in the tree (might be exceeded).
+//! @param [in] typical_num_of_nodes Expected maximum number of nodes in the tree (might be exceeded).
 //! @param [in] data_dtor_func_ptr Pointer to deconstructor of elememts to be stored in the tree.
 //! void data_dtor(void *data_ptr)
-#define tree_ctor( tree_ptr, data_size_in_bytes, typical_num_of_nodes, data_dtor_func_ptr ) \
-    tree_ctor_(tree_ptr, data_size_in_bytes, typical_num_of_nodes, data_dtor_func_ptr )
+#define tree_ctor( tree_ptr__, data_size_in_bytes__, typical_num_of_nodes__, data_dtor_func_ptr__ ) \
+    tree_ctor_(tree_ptr__, data_size_in_bytes__, typical_num_of_nodes__, data_dtor_func_ptr__ )
 #endif /* TREE_DO_DUMP */
 
 TreeStatus tree_dtor( Tree *tree_ptr );

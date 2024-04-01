@@ -250,7 +250,11 @@ TreeStatus tree_copy( Tree *dest, const Tree *src )
     assert(dest);
     TREE_SELFCHECK(src);
 
-    tree_ctor(dest, src->data_size, src->data_dtor_func_ptr, src->typical_num_of_nodes, src->print_data_func_ptr);
+#ifdef TREE_DO_DUMP
+    tree_ctor(dest, src->data_size, src->typical_num_of_nodes, src->data_dtor_func_ptr, src->print_data_func_ptr);
+#else /* NOT TREE_DO_DUMP */
+    tree_ctor(dest, src->data_size, src->typical_num_of_nodes, src->data_dtor_func_ptr);
+#endif
 
     if (src->root)
         dest->root = tree_copy_node( dest, NULL, src->root );

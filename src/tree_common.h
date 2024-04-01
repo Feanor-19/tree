@@ -10,8 +10,8 @@
     - TREE_ABORT_ON_DUMP - requires TREE_DO_DUMP
     - TREE_SHOW_DUMP_IMG - requires TREE_DO_DUMP
 */
-#define TREE_DO_DUMP
-#define TREE_SHOW_DUMP_IMG
+//#define TREE_DO_DUMP
+//#define TREE_SHOW_DUMP_IMG
 // TODO - делать разные версии касательно включения/выключения дефайнов
 
 #ifdef TREE_DO_DUMP

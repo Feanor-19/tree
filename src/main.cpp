@@ -11,7 +11,7 @@ int main()
     // TODO - ничего из _TREE_ALLOC не протестировано!!!!!!!
 
     Tree tree = {};
-    tree_ctor(&tree, sizeof(int), int_dtor, 20, int_print );
+    tree_ctor(&tree, sizeof(int), 20, int_dtor);
 
     int arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
