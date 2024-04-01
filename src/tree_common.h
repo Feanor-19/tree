@@ -49,6 +49,10 @@ struct TreeNode
 
     TreeNode *prev = NULL;  //< Is used in tree_dtor() and tree_dump()
     TreeNode *next = NULL;  //< Is used in tree_dtor() and tree_dump()
+
+    // Used for tree_alloc
+    size_t mem_pool_id      = 0;
+    size_t mem_pool_anchor  = 0;
 };
 
 #ifdef TREE_DO_DUMP
@@ -77,6 +81,8 @@ struct Tree
     void (*print_data_func_ptr)(FILE* stream, void *data_ptr) = NULL;
     TreeOrigInfo orig_info = {};
 #endif /* TREE_DO_DUMP */
+
+    size_t typical_num_of_nodes = 0;
 };
 
 

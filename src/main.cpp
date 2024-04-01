@@ -8,8 +8,10 @@ void int_print(FILE* stream, void *data);
 
 int main()
 {
+    // TODO - ничего из _TREE_ALLOC не протестировано!!!!!!!
+
     Tree tree = {};
-    tree_ctor(&tree, sizeof(int), int_dtor, int_print );
+    tree_ctor(&tree, sizeof(int), int_dtor, 20, int_print );
 
     int arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
@@ -22,6 +24,12 @@ int main()
     TreeNode *node2 = op_new_TreeNode( &tree, &arr[2] );
 
     tree_hang_loose_node_at_right( &tree, node2, node3 );
+
+    TREE_DUMP(&tree, 0);
+
+    tree_delete_right_child( &tree, node3 );
+
+    TREE_DUMP(&tree, 0);
 
     TreeNode *node4 = op_new_TreeNode( &tree, &arr[4] );
 

@@ -1,5 +1,6 @@
 #include "tree.h"
 // #include "tree_dump.h"
+#include "tree_alloc.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -12,6 +13,7 @@ TreeStatus tree_ctor_( Tree *tree_ptr,
                        void (*print_data_func_ptr)(FILE* stream, void *data_ptr),
                        TreeOrigInfo orig_info,
 #endif
+                       size_t typical_num_of_nodes,
                        void (*data_dtor_func_ptr)(void *data_ptr)
                     )
 {
@@ -23,6 +25,10 @@ TreeStatus tree_ctor_( Tree *tree_ptr,
     tree_ptr->nodes_count           = 0;
     tree_ptr->depth                 = 0;
     tree_ptr->root                  = NULL;
+
+    tree_ptr->typical_num_of_nodes  = typical_num_of_nodes;
+
+    _tree_alloc_init( sizeof(TreeNode) + data_size_in_bytes, typical_num_of_nodes );
 
 #ifdef TREE_DO_DUMP
     tree_ptr->print_data_func_ptr   = print_data_func_ptr;
@@ -36,6 +42,8 @@ TreeStatus tree_dtor( Tree *tree_ptr )
 {
     assert(tree_ptr);
 
+    // TODO - осознать, нужно ли это
+    /*
     TreeNode *curr_node_ptr = tree_ptr->head_of_all_nodes;
     while ( curr_node_ptr != NULL )
     {
@@ -43,6 +51,9 @@ TreeStatus tree_dtor( Tree *tree_ptr )
         op_del_TreeNode(tree_ptr, curr_node_ptr);
         curr_node_ptr = tmp;
     }
+    */
+
+    _tree_alloc_deinit();
 
     tree_ptr->root                  = NULL;
     tree_ptr->nodes_count           = 0;
@@ -239,7 +250,7 @@ TreeStatus tree_copy( Tree *dest, const Tree *src )
     assert(dest);
     TREE_SELFCHECK(src);
 
-    tree_ctor(dest, src->data_size, src->data_dtor_func_ptr, src->print_data_func_ptr);
+    tree_ctor(dest, src->data_size, src->data_dtor_func_ptr, src->typical_num_of_nodes, src->print_data_func_ptr);
 
     if (src->root)
         dest->root = tree_copy_node( dest, NULL, src->root );
@@ -467,7 +478,8 @@ TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data, TreeNode* parent )
 {
     assert(data);
 
-    char *new_mem = (char*) calloc( 1, sizeof(TreeNode) + tree_ptr->data_size );
+    //char *new_mem = (char*) calloc( 1, sizeof(TreeNode) + tree_ptr->data_size );
+    char *new_mem = (char*) _tree_alloc_new();
     if (!new_mem)
         return NULL;
 
@@ -531,7 +543,8 @@ void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
     node_ptr->next = NULL;
     node_ptr->prev = NULL;
 
-    free(node_ptr);
+    //free(node_ptr);
+    _tree_alloc_del( node_ptr );
 
     tree_ptr->nodes_count--;
 }
