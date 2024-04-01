@@ -42,17 +42,6 @@ TreeStatus tree_dtor( Tree *tree_ptr )
 {
     assert(tree_ptr);
 
-    // TODO - осознать, нужно ли это
-    /*
-    TreeNode *curr_node_ptr = tree_ptr->head_of_all_nodes;
-    while ( curr_node_ptr != NULL )
-    {
-        TreeNode *tmp = curr_node_ptr->next;
-        op_del_TreeNode(tree_ptr, curr_node_ptr);
-        curr_node_ptr = tmp;
-    }
-    */
-
     _tree_alloc_deinit();
 
     tree_ptr->root                  = NULL;
@@ -492,6 +481,7 @@ TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data, TreeNode* parent )
     TreeNode *new_node = (TreeNode *) new_mem;
     new_node->data_ptr = (void*) (new_mem + sizeof(TreeNode));
 
+#ifdef TREE_DO_DUMP
     TreeNode *tmp = tree_ptr->head_of_all_nodes;
     tree_ptr->head_of_all_nodes = new_node;
     new_node->next = tmp;
@@ -499,6 +489,7 @@ TreeNode *op_new_TreeNode( Tree *tree_ptr, void *data, TreeNode* parent )
     {
         tmp->prev = new_node;
     }
+#endif /* TREE_DO_DUMP */
 
     new_node->parent = parent;
 
@@ -532,6 +523,7 @@ void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
     node_ptr->data_ptr  = NULL;
     node_ptr->parent    = NULL;
 
+#ifdef TREE_DO_DUMP
     TreeNode *next = node_ptr->next;
     TreeNode *prev = node_ptr->prev;
     if (next)
@@ -543,9 +535,10 @@ void op_del_TreeNode( Tree *tree_ptr, TreeNode *node_ptr )
     {
        tree_ptr->head_of_all_nodes = next;
     }
-
+    
     node_ptr->next = NULL;
     node_ptr->prev = NULL;
+#endif /* TREE_DO_DUMP */
 
     //free(node_ptr);
     _tree_alloc_del( node_ptr );

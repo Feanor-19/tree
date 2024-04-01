@@ -47,8 +47,10 @@ struct TreeNode
 
     size_t level = 0;        //< Distance from the root node.
 
-    TreeNode *prev = NULL;  //< Is used in tree_dtor() and tree_dump()
-    TreeNode *next = NULL;  //< Is used in tree_dtor() and tree_dump()
+#ifdef TREE_DO_DUMP
+    TreeNode *prev = NULL;  //< Is used in tree_dump()
+    TreeNode *next = NULL;  //< Is used in tree_dump()
+#endif /* TREE_DO_DUMP */
 
     // Used for tree_alloc
     size_t mem_pool_id      = 0;
@@ -75,9 +77,8 @@ struct Tree
 
     void (*data_dtor_func_ptr)(void *data_ptr) = NULL;
 
-    TreeNode *head_of_all_nodes = NULL; //< Is used in tree_dtor() and tree_dump()
-
 #ifdef TREE_DO_DUMP
+    TreeNode *head_of_all_nodes = NULL; //< Is used in tree_dump()
     void (*print_data_func_ptr)(FILE* stream, void *data_ptr) = NULL;
     TreeOrigInfo orig_info = {};
 #endif /* TREE_DO_DUMP */
