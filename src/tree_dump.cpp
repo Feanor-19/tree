@@ -1,7 +1,8 @@
 #include "tree_dump.h"
 
+#include <string.h>
 #include <assert.h>
-#include <memory.h>
+#include <stdlib.h>
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -40,7 +41,7 @@ inline int verify_check_nodes_data_pointer( const Tree *tree_ptr )
     return 1;
 }
 
-#define DEF_TREE_VERIFY_FLAG(name, message, cond) {if ((cond)) {verify_res |= (1 << (bit));} bit++;}
+#define DEF_TREE_VERIFY_FLAG(name, message, cond) {if ((cond)) {verify_res |= (tree_verify_t) (1 << (bit));} bit++;}
 tree_verify_t tree_verify( const Tree *tree_ptr )
 {
     tree_verify_t verify_res = 0;
@@ -55,7 +56,7 @@ tree_verify_t tree_verify( const Tree *tree_ptr )
 
 void tree_print_verify_res(FILE *stream, tree_verify_t verify_res)
 {
-    fprintf(stream, "Tree verification result: <%llu>\n", verify_res);
+    fprintf(stream, "Tree verification result: <%lu>\n", verify_res);
     for (size_t ind = 0; ind < sizeof(tree_verification_messages)/sizeof(tree_verification_messages[0]); ind++)
     {
         if (verify_res & ( 1 << ind ))
@@ -67,9 +68,13 @@ void tree_print_verify_res(FILE *stream, tree_verify_t verify_res)
 
 void tree_print_status_message( FILE *stream, TreeStatus status )
 {
-    fprintf(stream, "%s", tree_status_messages[status]);
+    fprintf(stream, "%s\n", tree_status_messages[status]);
 }
 
+//! @brief (maybe) safe way to insert string 'source'
+//! into string 'str_dest' starting at 'start_ind'.
+//! @return *res == 1 if all is ok, *res == 0 if
+//! some error happened.
 inline size_t str_insert(   char *str_dest_begin,
                             size_t str_dest_capacity,
                             const char *str_source,
@@ -96,7 +101,7 @@ inline size_t str_insert(   char *str_dest_begin,
 
     }
 
-    str_dest_begin[str_dest_capacity] = '\0';
+    str_dest_begin[str_dest_capacity - 1] = '\0';
 
     if ( source_copied )
         *res = 1;
@@ -159,7 +164,7 @@ inline TreeStatus create_dump_folder_( char **curr_dump_dir_ptr )
 
     curr_dir_name_ind = str_insert( dir_name,
                                     TREE_MAX_DUMP_PATH_LENGHT,
-                                    "\\",
+                                    "//",
                                     curr_dir_name_ind,
                                     &res);
     if ( !res )
@@ -168,14 +173,14 @@ inline TreeStatus create_dump_folder_( char **curr_dump_dir_ptr )
     struct stat st = {};
 
     if (stat(TREE_DUMP_PATH, &st) == -1) {
-        int res_dir = mkdir(TREE_DUMP_PATH);
+        int res_dir = mkdir(TREE_DUMP_PATH, MKDIR_MODE);
 
         if (res_dir != 0)
             return TREE_STATUS_ERROR_CANT_CREATE_DUMP_DIR;
     }
 
     if (stat(dir_name, &st) == -1) {
-        int res_dir = mkdir(dir_name);
+        int res_dir = mkdir(dir_name, MKDIR_MODE);
 
         if (res_dir != 0)
             return TREE_STATUS_ERROR_CANT_CREATE_DUMP_DIR;
@@ -232,8 +237,8 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
                         "label = \"");
     fprintf(dot_file,   "Tree[%p] (%s) declared in %s(%d), in function %s.\\n"
                         "TREE_DUMP() called from %s(%d), from function %s.\\n"
-                        "data_size: %llu; nodes_count: %llu;\\nroot: [%p];head_of_all_nodes: [%p].\\n"
-                        "depth: %llu\\n",
+                        "data_size: %lu; nodes_count: %lu;\\nroot: [%p];head_of_all_nodes: [%p].\\n"
+                        "depth: %lu\\n",
                         tree_ptr,
                         tree_ptr->orig_info.name,
                         tree_ptr->orig_info.orig_file_name,
@@ -262,12 +267,12 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
             break;
         }
 
-        fprintf(dot_file,   "NODE_%llu[shape=\"record\", fontname=\"verdana\",\n"
+        fprintf(dot_file,   "NODE_%lu[shape=\"record\", fontname=\"verdana\",\n"
                             "style=bold, style=filled,\n"
                             "color=\"" COLOR_NODE_COLOR "\", fillcolor=\"" COLOR_NODE_FILL "\",\n"
                             "label = <<table cellspacing=\"0\">\n"
                             "<tr><td colspan=\"2\">address: [%p]</td></tr>\n"
-                            "<tr><td colspan=\"2\">level: %llu</td></tr>\n"
+                            "<tr><td colspan=\"2\">level: %lu</td></tr>\n"
                             "<tr><td colspan=\"2\">data: ",
                             ind,
                             curr_node,
@@ -305,20 +310,20 @@ inline TreeStatus write_dot_file_for_dump_( FILE *dot_file,
 
         if ( nodes_arr[ind]->left )
         {
-            fprintf(dot_file,   "NODE_%llu->NODE_%llu[color=\"" COLOR_EDGE_LEFT "\", penwidth=2];\n",
+            fprintf(dot_file,   "NODE_%lu->NODE_%lu[color=\"" COLOR_EDGE_LEFT "\", penwidth=2];\n",
                                 ind, left);
         }
 
         if ( nodes_arr[ind]->right )
         {
-            fprintf(dot_file,   "NODE_%llu->NODE_%llu[color=\"" COLOR_EDGE_RIGHT "\", penwidth=2];\n",
+            fprintf(dot_file,   "NODE_%lu->NODE_%lu[color=\"" COLOR_EDGE_RIGHT "\", penwidth=2];\n",
                                 ind, right);
         }
 
         if ( nodes_arr[ind]->left && nodes_arr[ind]->right )
         {
-            fprintf(dot_file,   "NODE_%llu->NODE_%llu[style=invis];\n"
-                                "{rank=same NODE_%llu NODE_%llu}",
+            fprintf(dot_file,   "NODE_%lu->NODE_%lu[style=invis];\n"
+                                "{rank=same NODE_%lu NODE_%lu}",
                                 left, right, left, right);
         }
     }
@@ -359,9 +364,12 @@ inline TreeStatus generate_dump_img_( const char * dump_dot_path, const char * d
         return TREE_STATUS_ERROR_TOO_LONG_CMD_GEN_DUMP_IMG;
     }
 
-    system(cmd);
+    int res = system(cmd);
 
-    fprintf(stderr, "Dedlist dump image is generated!\n");
+    if (res == 0) 
+        fprintf(stderr, "Tree dump image is generated!\n");
+    else    
+        fprintf(stderr, "ERROR: Something went wrong during an attempt to call 'dot'.\n");
 
     return TREE_STATUS_OK;
 }
@@ -395,8 +403,8 @@ void tree_dump_( const Tree *tree_ptr,
     WRP_PRINT( create_dump_folder_(&curr_dump_dir) );
 
     char dot_file_path[TREE_MAX_DUMP_PATH_LENGHT] = "";
-    strcpy(dot_file_path, curr_dump_dir);
-    strcat(dot_file_path, "dmp.dot");
+    strncpy(dot_file_path, curr_dump_dir, TREE_MAX_DUMP_PATH_LENGHT);
+    strncat(dot_file_path, "dmp.dot", TREE_MAX_DUMP_PATH_LENGHT - strlen(dot_file_path));
 
     WRP_PRINT( create_tmp_dot_file_( dot_file_path, &dot_file ) );
 
@@ -405,8 +413,8 @@ void tree_dump_( const Tree *tree_ptr,
     WRP_PRINT( free_dot_file_(dot_file) );
 
     char img_file_path[TREE_MAX_DUMP_PATH_LENGHT] = "";
-    strcpy(img_file_path, curr_dump_dir);
-    strcat(img_file_path, "dmp.jpg");
+    strncpy(img_file_path, curr_dump_dir, TREE_MAX_DUMP_PATH_LENGHT);
+    strncat(img_file_path, "dmp.jpg", TREE_MAX_DUMP_PATH_LENGHT - strlen(img_file_path));
 
     WRP_PRINT( generate_dump_img_( dot_file_path, img_file_path ) );
 

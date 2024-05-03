@@ -2,9 +2,11 @@
 #define TREE_DUMP_H
 
 #include "tree_common.h"
-
+#include <sys/types.h>
 
 #ifdef TREE_DO_DUMP
+    const mode_t MKDIR_MODE = 0777;
+
     tree_verify_t tree_verify( const Tree *tree_ptr );
     void tree_print_verify_res(FILE *stream, tree_verify_t verify_res);
     void tree_dump_( const Tree *tree_ptr,
@@ -14,10 +16,10 @@
                     const char *func);
 
     #define TREE_DUMP( tree_ptr, verify_res ) tree_dump_( tree_ptr,     \
-                                                        verify_res,   \
-                                                        __FILE__,     \
-                                                        __LINE__,     \
-                                                        __func__ )
+                                                          verify_res,   \
+                                                          __FILE__,     \
+                                                          __LINE__,     \
+                                                          __func__ )
 
 
     #define TREE_SELFCHECK( tree_ptr ) {                        \

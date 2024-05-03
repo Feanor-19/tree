@@ -3,6 +3,7 @@ CC=g++
 SAN = -fsanitize=alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr,leak,address
 sanitize_banned = leak,address
 
+ifndef RELEASE
 CFLAGS  =	-D _DEBUG -ggdb3 -std=c++17 -Wall -Wextra -Weffc++ 									\
 			-Waggressive-loop-optimizations -Wc++14-compat -Wmissing-declarations 				\
 			-Wcast-align -Wcast-qual -Wchar-subscripts -Wconditionally-supported 				\
@@ -18,16 +19,22 @@ CFLAGS  =	-D _DEBUG -ggdb3 -std=c++17 -Wall -Wextra -Weffc++ 									\
 			-Wstack-protector -fcheck-new -fsized-deallocation -fstack-protector 				\
 			-fstrict-overflow -flto-odr-type-merging -fno-omit-frame-pointer					\
 			-Wstack-usage=8192 -pie -fPIE -Werror=vla $(SAN)
-			
+else		
+CFLAGS = -D NDEBUG 
+endif
 
 OBJ = obj
 SRC = src
 BIN = bin
 
+LIB_OUT = lib_out
+
 SOURCES 	= $(wildcard $(SRC)/*.cpp)
 OBJFILES 	= $(patsubst $(SRC)/%,$(OBJ)/%,$(SOURCES:.cpp=.o))
 OUT 		= $(BIN)/prog
 DUMP_FOLDER = ./dumps
+
+OPTIMIZE = -O2
 
 $(OUT) : $(OBJFILES)
 	$(CC) -o $@ $(CFLAGS) $^
@@ -38,6 +45,18 @@ $(OBJ)/%.o : $(SRC)/%.cpp
 .PHONY: run
 run:
 	$(OUT)
+
+MAIN_OBJ = $(OBJ)/main.o
+OBJS_FOR_LIB = $(filter-out $(MAIN_OBJ),$(OBJFILES)) 
+
+.PHONY: make_lib
+make_lib:
+	ar -cvq $(LIB_OUT)/libtree.a $(OBJS_FOR_LIB)
+
+.PHONY: copy_lib
+copy_lib:
+	cp $(LIB_OUT)/* /usr/lib/feanor/tree
+	cp $(SRC)/*.h /usr/include/feanor/tree
 
 .PHONY: clean
 clean:

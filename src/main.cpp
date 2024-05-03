@@ -9,7 +9,11 @@ int main()
     // TODO - ничего из _TREE_ALLOC не протестировано!!!!!!!
 
     Tree tree = {};
+#ifdef TREE_DO_DUMP
+    tree_ctor(&tree, sizeof(int), 20, NULL, int_print);
+#else
     tree_ctor(&tree, sizeof(int), 20, NULL);
+#endif
 
     int arr[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
@@ -22,6 +26,8 @@ int main()
     tree_hang_loose_node_as_root( &tree, node3 );
 
     tree_delete_right_child( &tree, node3 );
+
+    TREE_DUMP(&tree, 0);
 
     tree_dtor(&tree);
 

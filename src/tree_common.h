@@ -10,9 +10,11 @@
     - TREE_ABORT_ON_DUMP - requires TREE_DO_DUMP
     - TREE_SHOW_DUMP_IMG - requires TREE_DO_DUMP
 */
-//#define TREE_DO_DUMP
-//#define TREE_SHOW_DUMP_IMG
-// TODO - делать разные версии касательно включения/выключения дефайнов
+
+#ifndef NDEBUG
+#   define TREE_DO_DUMP
+#   define TREE_SHOW_DUMP_IMG
+#endif
 
 #ifdef TREE_DO_DUMP
 typedef uint64_t tree_verify_t;
@@ -104,7 +106,7 @@ const char * const tree_verification_messages[] =
 #undef DEF_TREE_VERIFY_FLAG
 
 //! @brief Dump files will be stored in folder, specified by this path.
-const char* const TREE_DUMP_PATH = ".\\dumps\\";
+const char* const TREE_DUMP_PATH = ".//dumps//";
 const size_t TREE_MAX_DUMP_PATH_LENGHT = 1024;
 const size_t TREE_MAX_CMD_GEN_DUMP_IMG_LENGHT = 1024;
 #endif /* TREE_DO_DUMP */
