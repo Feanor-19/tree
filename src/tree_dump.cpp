@@ -374,15 +374,6 @@ inline TreeStatus generate_dump_img_( const char * dump_dot_path, const char * d
     return TREE_STATUS_OK;
 }
 
-#ifdef TREE_SHOW_DUMP_IMG
-inline TreeStatus show_dump_img_( const char * dump_img_path )
-{
-    system(dump_img_path);
-
-    return TREE_STATUS_OK;
-}
-#endif
-
 inline TreeStatus free_dot_file_( FILE * dot_tmp_file )
 {
     fclose(dot_tmp_file);
@@ -417,10 +408,6 @@ void tree_dump_( const Tree *tree_ptr,
     strncat(img_file_path, "dmp.jpg", TREE_MAX_DUMP_PATH_LENGHT - strlen(img_file_path));
 
     WRP_PRINT( generate_dump_img_( dot_file_path, img_file_path ) );
-
-#ifdef TREE_SHOW_DUMP_IMG
-    WRP_PRINT( show_dump_img_( img_file_path ) );
-#endif
 
     free(curr_dump_dir);
 

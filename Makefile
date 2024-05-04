@@ -34,8 +34,6 @@ OBJFILES 	= $(patsubst $(SRC)/%,$(OBJ)/%,$(SOURCES:.cpp=.o))
 OUT 		= $(BIN)/prog
 DUMP_FOLDER = ./dumps
 
-OPTIMIZE = -O2
-
 $(OUT) : $(OBJFILES)
 	$(CC) -o $@ $(CFLAGS) $^
 

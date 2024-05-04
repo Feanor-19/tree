@@ -38,9 +38,29 @@ TreeStatus tree_ctor_( Tree *tree_ptr,
     return TREE_STATUS_OK;
 }
 
+//! @brief Applies 'data_dtor' to every node in the given tree.
+//! @note  Uses the fact that nodes are connected in a list.
+//! @attention 'tree_ptr->data_dtor_func_ptr' MUSTN'T BE NULL! 
+inline void dtor_all_nodes_data( Tree *tree_ptr )
+{
+    assert(tree_ptr);
+    assert(tree_ptr->data_dtor_func_ptr);
+
+    TreeNode *curr_node = tree_ptr->head_of_all_nodes;
+    while (curr_node)
+    {
+        tree_ptr->data_dtor_func_ptr( curr_node->data_ptr );
+
+        curr_node = curr_node->next;
+    }
+}
+
 TreeStatus tree_dtor( Tree *tree_ptr )
 {
     assert(tree_ptr);
+
+    if ( tree_ptr->data_dtor_func_ptr )
+        dtor_all_nodes_data( tree_ptr );
 
     _tree_alloc_deinit();
 
