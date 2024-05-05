@@ -49,6 +49,7 @@ OBJS_FOR_LIB = $(filter-out $(MAIN_OBJ),$(OBJFILES))
 
 .PHONY: make_lib
 make_lib:
+	rm -f $(LIB_OUT)/*
 	ar -cvq $(LIB_OUT)/libtree.a $(OBJS_FOR_LIB)
 
 .PHONY: copy_lib
